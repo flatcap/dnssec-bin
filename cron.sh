@@ -103,10 +103,10 @@ function current_ksk()
 		echo We can use an existing KSK for zone $ZONE
 	fi
 
-	REGEX=$(printf "(%02d|%02d)%02d" $(((KSK_MONTH1+11)%12)) $(((KSK_MONTH2+11)%12)) $SWAP_DAY)
+	REGEX=$(printf "(%02d|%02d)%02d" $(((10#$KSK_MONTH1+11)%12)) $(((10#$KSK_MONTH2+11)%12)) $SWAP_DAY)
 	if [[ $MONTH$DAY =~ $REGEX ]]; then
-		echo Time for a new KSK: $ZONE $YEAR $((MONTH+1))
-		generate-ksk $ZONE $YEAR $((MONTH+1))
+		echo Time for a new KSK: $ZONE $YEAR $((10#$MONTH+1))
+		generate-ksk $ZONE $YEAR $((10#$MONTH+1))
 	fi
 }
 
@@ -127,8 +127,8 @@ function current_zsk()
 	fi
 
 	if [ $DAY = "$SWAP_DAY" ]; then
-		echo Time for a new ZSK: $ZONE $YEAR $((MONTH+1))
-		generate-zsk $ZONE $YEAR $((MONTH+1))
+		echo Time for a new ZSK: $ZONE $YEAR $((10#$MONTH+1))
+		generate-zsk $ZONE $YEAR $((10#$MONTH+1))
 	fi
 }
 
