@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+chdir('/etc/bind/master/grepular.com');
+
+## Read/modify the zone
+
+my $zone;
+{
+	open my $in,  '<', 'named.conf'     or die $!;
+	open my $out, '>', 'named.conf.tmp' or die $!;
+	while(<$in>){
+		my $line = $_;
+		$line =~ s/[\r\n]+//gsm;
+		if( $line =~ /^(\s*)(\d+)(\s*;\s*serial\s*)$/i ){
+			$line = $1.newserial($2).$3;
+		}
+		print $out "$line\n";
+	}
+	close $out;
+	close $in;
+}
+
+## Replace old named.conf with new one
+
+rename( "named.conf.tmp", "named.conf" ) or die $!;
+
+## Rebuild named.conf.signed
+
+system "/usr/sbin/dnssec-signzone -S -o grepular.com -K keys named.conf";
+
+## Reload new signed zone
+
+system "/usr/sbin/rndc reload grepular.com";
+
+## Calculate the new serial. Format = YYYYMMDDXX, where XX is an incrementing number
+
+sub newserial {
+	my $oldserial = shift;
+
+	my( $mday, $month, $year ) = (localtime())[3..5];
+	my $newserial = sprintf('%s%02d%02d01', $year+1900, $month+1, $mday );
+
+	$newserial = $oldserial+1 if $newserial <= $oldserial;
+
+	return $newserial;
+}
+
