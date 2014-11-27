@@ -2,8 +2,6 @@
 
 PATH="/usr/bin:/usr/sbin"
 
-[ -n "$1" ] || exit 1
-
 set -o errexit	# set -e
 set -o nounset	# set -u
 
