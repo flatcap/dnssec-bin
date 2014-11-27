@@ -12,9 +12,10 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-chown --recursive root.named .
-chmod --recursive u+rw,g+rX,o-rwx .
-chmod --recursive g+w dynamic data
-chcon --recursive --user system_u --role object_r .
-restorecon -r .
+(
+	echo '; Maintain glue to our external dns'
+	for i in {1..5}; do
+		host ns$i.linode.com | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/'
+	done | column -t
+) > dns-glue.db
 

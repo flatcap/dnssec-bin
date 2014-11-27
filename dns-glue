@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo '; Maintain glue to our external dns'
-for i in {1..5}; do
-	host ns$i.linode.com | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/'
-done | column -t
-
