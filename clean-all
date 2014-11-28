@@ -1,0 +1,22 @@
+#!/bin/sh
+
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+rm -f keys/*
+rm -f dynamic/*
+rm -f data/*
+rm -f *.signed
+
+# These are generated, too
+# rm -f dns-glue.db
+# rm -f ssh-fingerprint.db
+# rm -f named.ca
+
