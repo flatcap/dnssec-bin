@@ -17,3 +17,6 @@ dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR ${ZONE}.db
 mv dsset-${ZONE}. $KEYDIR
 
 # dig +norec @a.root-servers.net > named.ca
+# bin/generate-dns-glue
+# bin/generate-ssh-fingerprint
+
