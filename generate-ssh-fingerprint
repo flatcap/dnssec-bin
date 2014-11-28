@@ -10,5 +10,8 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-ssh-keygen -r @ > ssh-fingerprint.db
+(
+	echo '; SSH fingerprints'
+	ssh-keygen -r @
+) > ssh-fingerprint.db
 
