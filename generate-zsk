@@ -18,9 +18,9 @@ fi
 ZONE="$1"
 YEAR="${2:-$(date '+%Y')}"
 MONTH="${3:-$(date '+%m')}"
-DAY="03"
-TIME="060000"
-VALID="6 months"
+DAY="06"
+TIME="080000"
+VALID="1 month"
 
 P="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY - 2 days")$TIME"
 A="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY")$TIME"
@@ -36,5 +36,5 @@ D="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 KEYDIR=keys
 mkdir -p $KEYDIR
 
-dnssec-keygen -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK -P $P -A $A -I $I -D $D $ZONE
+dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE -K $KEYDIR -P $P -A $A -I $I -D $D $ZONE
 
