@@ -11,18 +11,26 @@ ionice --class 3     --pid $$ > /dev/null
 cd /var/named
 
 KEYDIR=keys
-ZONE=${1:-russon.org}
-
 mkdir -p $KEYDIR
 
-# # Create a Key Signing Key (KSK)
-# dnssec-keygen -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK $ZONE
+bin/clean-all
 
-# # Create a Zone Signing Key (ZSK)
-# dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE -K $KEYDIR $ZONE
+bin/generate-dns-glue
+bin/generate-root-certs
+bin/generate-ssh-fingerprint
 
-# Sign the zone, and write it out to a file named zone.signed
-SALT=$(head -c 1000 /dev/random | sha1sum | cut -b 1-16)
-dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR ${ZONE}.db
-mv dsset-${ZONE}. $KEYDIR
+bin/generate-ksk flatcap.org 2014 11
+bin/generate-ksk russon.org 2014 11
+bin/generate-zsk flatcap.org 2014 11
+bin/generate-zsk flatcap.org 2014 12
+bin/generate-zsk russon.org 2014 11
+bin/generate-zsk russon.org 2014 12
+
+bin/generate-tlsa
+bin/update-serials russon.org.db
+
+bin/sign-zone flatcap.org
+bin/sign-zone russon.org
+
+bin/fix-perms
 
