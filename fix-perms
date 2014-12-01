@@ -12,7 +12,8 @@ cd /var/named
 
 chown --recursive root.named .
 chmod --recursive u+rw,g+rX,o-rwx .
-chmod --recursive g+w dynamic data
+chmod --recursive g+w data dynamic
+chmod --recursive og-rwx bin keys .git*
 chcon --recursive --user system_u --role object_r .
 restorecon -r .
 
