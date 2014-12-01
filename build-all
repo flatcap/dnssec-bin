@@ -1,7 +1,17 @@
 #!/bin/bash
 
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
 KEYDIR=keys
-ZONE=russon.org
+ZONE=${1:-russon.org}
 
 mkdir -p $KEYDIR
 
@@ -19,4 +29,5 @@ mv dsset-${ZONE}. $KEYDIR
 # dig +norec @a.root-servers.net > named.ca
 # bin/generate-dns-glue
 # bin/generate-ssh-fingerprint
+# bin/generate-tlsa
 
