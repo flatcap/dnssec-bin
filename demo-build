@@ -1,13 +1,23 @@
 #!/bin/bash
 
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
 KEYDIR=keys
 ZONE=russon.org
 
-rm -fr $KEYDIR
 mkdir -p $KEYDIR
+rm -fr $KEYDIR/*
 
-P=$(date -d "Jul 14 2014" "+%Y%m%d%H%M%S")
-A=$(date -d "Jul 16 2014" "+%Y%m%d%H%M%S")
+P=$(date -d "Jun 14 2014" "+%Y%m%d%H%M%S")
+A=$(date -d "Jun 16 2014" "+%Y%m%d%H%M%S")
 I=$(date -d "Dec 16 2014" "+%Y%m%d%H%M%S")
 D=$(date -d "Dec 18 2014" "+%Y%m%d%H%M%S")
 
