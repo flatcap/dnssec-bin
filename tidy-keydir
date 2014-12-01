@@ -1,0 +1,26 @@
+#!/bin/bash
+
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+KEYDIR="keys"
+
+FILES="$(find $KEYDIR -type f)"
+[ -z "$FILES" ] && exit 0
+
+TODAY=$(date "+%Y%m%d%H%M%S")
+for i in $FILES; do
+	EXPIRY=$(sed -n "s/.*Delete: \([0-9]\{14\}\).*/\1/p" $i)
+	[ -z "$EXPIRY" ] && continue
+	if [ $TODAY -gt $EXPIRY ]; then
+		rm -f $i
+	fi
+done
+
