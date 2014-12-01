@@ -1,0 +1,39 @@
+#!/bin/bash
+
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+if [ ! $# = 1 -a ! $# = 3 ]; then
+	echo "Usage: ${0##*/} ZONE [YEAR MONTH]"
+	exit 1
+fi
+
+ZONE="$1"
+YEAR="${2:-$(date '+%Y')}"
+MONTH="${3:-$(date '+%m')}"
+DAY="03"
+TIME="060000"
+VALID="6 months"
+
+P="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY - 2 days")$TIME"
+A="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY")$TIME"
+I="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID")$TIME"
+D="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
+
+# echo P=$P
+# echo A=$A
+# echo I=$I
+# echo D=$D
+
+KEYDIR=keys
+mkdir -p $KEYDIR
+
+dnssec-keygen -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK -P $P -A $A -I $I -D $D $ZONE
+

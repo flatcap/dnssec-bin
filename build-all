@@ -15,19 +15,14 @@ ZONE=${1:-russon.org}
 
 mkdir -p $KEYDIR
 
-# Create a Key Signing Key (KSK)
-dnssec-keygen -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK $ZONE
+# # Create a Key Signing Key (KSK)
+# dnssec-keygen -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK $ZONE
 
-# Create a Zone Signing Key (ZSK)
-dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE -K $KEYDIR $ZONE
+# # Create a Zone Signing Key (ZSK)
+# dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE -K $KEYDIR $ZONE
 
 # Sign the zone, and write it out to a file named zone.signed
 SALT=$(head -c 1000 /dev/random | sha1sum | cut -b 1-16)
 dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR ${ZONE}.db
 mv dsset-${ZONE}. $KEYDIR
-
-# dig +norec @a.root-servers.net > named.ca
-# bin/generate-dns-glue
-# bin/generate-ssh-fingerprint
-# bin/generate-tlsa
 
