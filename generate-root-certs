@@ -1,0 +1,16 @@
+#!/bin/bash
+
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+dig +norecurse +nostats +nocomments +nocmd @a.root-servers.net | grep -v "^;" | LANG=C sort > named.ca
+
+bin/fix-perms
+
