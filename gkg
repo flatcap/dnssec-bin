@@ -29,10 +29,10 @@ PASSWD="--user flatcap:ha2meiChu8"
 #	401 Unauthorized
 #	403 Forbidden
 #	404 Not Found
-# curl $PASSWD \
+# curl -s $PASSWD \
 # 	-H "Accept: application/json" \
 # 	-o /dev/null \
-# 	-w "{http_code}" \
+# 	-w "%{http_code}" \
 # 	-X DELETE \
 # 	"$RUSSON/B15A9A27528D250682D7C3ED91B9F4ED270FE271AC48A2D8CB75975171506822"
 
@@ -43,10 +43,10 @@ PASSWD="--user flatcap:ha2meiChu8"
 #	403 Forbidden
 #	404 Not Found
 #	415 Unsupported Media Type
-# curl $PASSWD \
+curl -s $PASSWD \
 # 	-H "Accept: application/json" \
 # 	-o /dev/null \
-# 	-w "{http_code}" \
+# 	-w "%{http_code}" \
 # 	-X POST \
 # 	-d '{ "digest":"B15A9A27528D250682D7C3ED91B9F4ED270FE271AC48A2D8CB75975171506822", "digestType":"2", "algorithm":"7", "keyTag":"19956", "maxSigLife":"3456000" }' \
 # 	$RUSSON
