@@ -140,15 +140,15 @@ sub main
 	}
 	# print Dumper (%gkg_list);
 
-	# foreach (keys %ds_list) {
-	# 	if (exists $gkg_list{$_}) {
-	# 		printf "exists on server\n";
-	# 	} else {
-	# 		my $ds = $ds_list{$_};
-	# 		printf "Uploading $domain: $ds->{'digest'}\n";
-	# 		create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
-	# 	}
-	# }
+	foreach (keys %ds_list) {
+		if (exists $gkg_list{$_}) {
+			printf "exists on server\n";
+		} else {
+			my $ds = $ds_list{$_};
+			printf "Uploading $domain: $ds->{'digest'}\n";
+			create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
+		}
+	}
 
 	foreach (keys %gkg_list) {
 		if (exists $ds_list{$_}) {
