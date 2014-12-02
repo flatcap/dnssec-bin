@@ -43,7 +43,7 @@ PASSWD="--user flatcap:ha2meiChu8"
 #	403 Forbidden
 #	404 Not Found
 #	415 Unsupported Media Type
-curl -s $PASSWD \
+# curl -s $PASSWD \
 # 	-H "Accept: application/json" \
 # 	-o /dev/null \
 # 	-w "%{http_code}" \
