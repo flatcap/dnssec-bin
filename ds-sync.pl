@@ -23,18 +23,18 @@ sub get_files
 		 return;
 	}
 
-	my @ds_list;
+	my %ds_list;
 
 	while (<$info>) {
 		chomp;
 		my ($zone, $class, $rr, $key, $algo, $dtype, $digest) = split ("[ \t]+", $_, 7);
 		$digest =~ s/ //g;
-		push (@ds_list, { keyTag => $key, algorithm => $algo, digestType => $dtype, digest => $digest });
+		$ds_list{$digest} = { keyTag => $key, algorithm => $algo, digestType => $dtype, digest => $digest };
 	}
 
 	close $info;
 
-	return @ds_list;
+	return %ds_list;
 }
 
 sub get_gkg
@@ -42,12 +42,12 @@ sub get_gkg
 	my ($domain) = @_;
 	my $host     = 'https://www.gkg.net';
 	my $url      = "/ws/domain/$domain/ds";
-	my $headers  = { Accept => 'application/json', Authorization => 'Basic ' . encode_base64($username . ':' . $password) };
+	my $headers  = { Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . ':' . $password) };
 
 	my $client = REST::Client->new();
-	$client->setHost($host);
+	$client->setHost ($host);
 
-	$client->GET($url, $headers);
+	$client->GET ($url, $headers);
 
 	my $code = $client->responseCode();
 	if ($code != '200') {
@@ -55,51 +55,109 @@ sub get_gkg
 		return;
 	}
 
-	return @{from_json($client->responseContent())};
+	my %gkg_list;
+
+	foreach (@{from_json ($client->responseContent())}) {
+		my $digest = $_->{'digest'};
+		$gkg_list{$digest} = $_;
+	}
+
+	return %gkg_list;
 }
+
+sub create_ds
+{
+	my ($domain, $key, $algo, $dtype, $digest) = @_;
+
+	my $host = "https://www.gkg.net";
+	my $url  = "/ws/domain/$domain/ds";
+
+	my $headers = { Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . ':' . $password) };
+	my $client = REST::Client->new();
+	$client->setHost ($host);
+
+	my $body = "{ 'digest':'$digest', 'digestType':'$dtype', 'algorithm':'$algo', 'keyTag':'$key', 'maxSigLife':'3456000' }";
+
+	$client->POST($url, $body, $headers);
+	# Responses:
+	#	201 Created
+	#	401 Unauthorized
+	#	403 Forbidden
+	#	404 Not Found
+	#	415 Unsupported Media Type
+
+	my $code = $client->responseCode();
+	if ($code != '201') {
+		print STDERR "Create failed: $code\n";
+		return;
+	}
+
+	return 1;
+}
+
+sub delete_ds
+{
+	my ($domain, $digest) = @_;
+
+	my $host = "https://www.gkg.net";
+	my $url  = "/ws/domain/$domain/ds";
+
+	my $headers = { Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . ':' . $password) };
+	my $client = REST::Client->new();
+	$client->setHost ($host);
+
+	$url .= "/$digest";
+	$client->DELETE ($url, $headers);
+	# Responses:
+	#	204 No Content
+	#	401 Unauthorized
+	#	403 Forbidden
+	#	404 Not Found
+
+	my $code = $client->responseCode();
+	if ($code != '204') {
+		print STDERR "Delete failed: $code\n";
+		return;
+	}
+
+	return 1;
+}
+
 
 sub main
 {
-	my $domain   = 'russon.org';
+	my $domain = 'russon.org';
 
-	my @ds_list  = get_files ($domain);
-	if (@ds_list == 0) {
+	my %ds_list = get_files ($domain);
+	if (!%ds_list) {
+		return 1
+	}
+	# print Dumper (%ds_list);
+
+	my %gkg_list = get_gkg ($domain);
+	if (!%gkg_list) {
 		return 1;
 	}
-	# print Dumper (@ds_list);
-	my %ds_digest;
-	foreach (keys @ds_list) {
-		my $digest = $ds_list[$_]{'digest'};
-		$ds_digest{$digest} = ();
-	}
-	# print Dumper (%ds_digest);
+	# print Dumper (%gkg_list);
 
-	my @gkg_list = get_gkg ($domain);
-	if (@gkg_list == 0) {
-		return 1;
-	}
-	# print Dumper (@gkg_list);
+	# foreach (keys %ds_list) {
+	# 	if (exists $gkg_list{$_}) {
+	# 		printf "exists on server\n";
+	# 	} else {
+	# 		my $ds = $ds_list{$_};
+	# 		printf "Uploading $domain: $ds->{'digest'}\n";
+	# 		create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
+	# 	}
+	# }
 
-	my %gkg_digest;
-	foreach (keys @gkg_list) {
-		my $digest = $gkg_list[$_]{'digest'};
-		$gkg_digest{$digest} = ();
-	}
-	# print Dumper (%gkg_digest);
-
-	foreach (keys %ds_digest) {
-		if (exists $gkg_digest{$_}) {
-			printf "exists on server\n";
-		} else {
-			printf "need to upload: $_\n";
-		}
-	}
-
-	foreach (keys %gkg_digest) {
-		if (exists $ds_digest{$_}) {
+	foreach (keys %gkg_list) {
+		if (exists $ds_list{$_}) {
 			printf "matches local file\n";
 		} else {
 			printf "need to delete: $_\n";
+			my $gkg = $gkg_list{$_};
+			printf "Deleting $domain: $gkg->{'digest'}\n";
+			delete_ds ($domain, $gkg->{'digest'});
 		}
 	}
 
