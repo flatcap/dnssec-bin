@@ -76,7 +76,10 @@ sub create_ds
 	my $client = REST::Client->new();
 	$client->setHost ($host);
 
-	my $body = "{ 'digest':'$digest', 'digestType':'$dtype', 'algorithm':'$algo', 'keyTag':'$key', 'maxSigLife':'3456000' }";
+	my $body = "{ \"digest\":\"$digest\", \"digestType\":\"$dtype\", \"algorithm\":\"$algo\", \"keyTag\":\"$key\", \"maxSigLife\":\"3456000\" }";
+	# print "host = $host\n";
+	# print "url  = $url\n";
+	# print "body = $body\n";
 
 	$client->POST($url, $body, $headers);
 	# Responses:
@@ -92,6 +95,7 @@ sub create_ds
 		return;
 	}
 
+	print "create succeeded: $digest\n";
 	return 1;
 }
 
@@ -126,7 +130,7 @@ sub delete_ds
 
 sub main
 {
-	my $domain = 'russon.org';
+	my $domain = 'flatcap.org';
 
 	my %ds_list = get_files ($domain);
 	if (!%ds_list) {
