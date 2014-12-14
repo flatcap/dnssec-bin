@@ -8,12 +8,20 @@ set -o nounset	# set -u
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
+shopt -s nullglob
+
 cd /var/named
 
 chown --recursive root.named .
+
 chmod --recursive u+rw,g+rX,o-rwx .
 chmod --recursive g+w data dynamic
-chmod --recursive og-rwx bin keys .git*
+
+# keys/ and .git* may not exist
+FILES=(*.git*)
+[ -d keys ] && FILES+=('keys')
+[ ${#FILES[@]} -gt 0 ] && chmod --recursive og-rwx bin ${FILES[@]}
+
 chcon --recursive --user system_u --role object_r .
 restorecon -r .
 
