@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ $# = 1 ]; then
-	if [ "$1" = "-h" -o "$1" = "--help" ]; then
-		echo "Usage: ${0##*/} [zonefile...]"
-		exit 1
-	fi
-fi
+function usage()
+{
+	echo "Usage: ${0##*/} [zonefile...]"
+	exit 1
+}
+
 
 shopt -s nullglob
 
@@ -43,12 +43,7 @@ done
 
 echo "$SERIAL"
 for FILE in ${FILE_LIST[@]}; do
-	if [ ! -s "$FILE" ]; then
-		continue
-	fi
-
 	ZONE="${FILE%.db}"
-
 	sed -i "s/\<[0-9]\{10\}\>/$SERIAL/" $FILE
 	echo -e "\t$ZONE"
 done

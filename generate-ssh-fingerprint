@@ -13,5 +13,5 @@ cd /var/named
 (
 	echo '; SSH fingerprints'
 	ssh-keygen -r @
-) > ssh-fingerprint.inc
+) > ssh-fingerprint.db
 

@@ -16,7 +16,7 @@ for ZONE in flatcap.org russon.org; do
 	for PORT in 443 993 995; do
 		danetool --load-certificate /etc/pki/tls/${ZONE}.crt --proto tcp --port $PORT --host $ZONE --tlsa-rr
 	done
-	) > ${ZONE}.tlsa.inc
+	) > ${ZONE}.tlsa.db
 done
 
 bin/fix-perms
