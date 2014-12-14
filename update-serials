@@ -1,16 +1,35 @@
 #!/bin/bash
 
+if [ $# = 1 ]; then
+	if [ "$1" = "-h" -o "$1" = "--help" ]; then
+		echo "Usage: ${0##*/} [zonefile...]"
+		exit 1
+	fi
+fi
+
+shopt -s nullglob
+
 if [ $# = 0 ]; then
-	echo "Usage: ${0##*/} {zonefile...}"
-	exit 1
+	FILE_LIST=(*.db)
+
+	if [ ${#FILE_LIST[@]} = 0 ]; then
+		echo "No zone files"
+		exit 1
+	fi
+else
+	FILE_LIST=($@)
 fi
 
 SERIAL="$(date '+%Y%m%d00')"
 
-for i in "$@"; do
-	FILE="$i"
-	[[ "$i" =~ .*\.rev ]] && ZONE="${i/rev/in-addr.arpa}"
-	[[ "$i" =~ .*\.db  ]] && ZONE="${i%.db}"
+for FILE in ${FILE_LIST[@]}; do
+	if [ ! -s "$FILE" ]; then
+		echo "File doesn't exist: $FILE"
+		continue
+	fi
+
+	ZONE="${FILE%.db}"
+
 	ZONE_SERIAL=$(/usr/sbin/named-checkzone $ZONE $FILE | egrep -ho '[0-9]{10}')
 	if [ -z "$ZONE_SERIAL" ]; then
 		echo "Bad zone file: $FILE"
@@ -23,10 +42,13 @@ done
 : $((SERIAL++))
 
 echo "$SERIAL"
-for i in "$@"; do
-	FILE="$i"
-	ZONE="${i/rev/in-addr.arpa}"
-	ZONE="${i%.db}"
+for FILE in ${FILE_LIST[@]}; do
+	if [ ! -s "$FILE" ]; then
+		continue
+	fi
+
+	ZONE="${FILE%.db}"
+
 	sed -i "s/\<[0-9]\{10\}\>/$SERIAL/" $FILE
 	echo -e "\t$ZONE"
 done
