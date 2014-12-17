@@ -128,9 +128,10 @@ sub delete_ds
 }
 
 
-sub main
+sub synchronise
 {
-	my $domain = 'flatcap.org';
+	my ($domain) = @_;
+	print "$domain:\n";
 
 	my %ds_list = get_files ($domain);
 	if (!%ds_list) {
@@ -146,7 +147,7 @@ sub main
 
 	foreach (keys %ds_list) {
 		if (exists $gkg_list{$_}) {
-			printf "exists on server\n";
+			printf "\tSERVER: $_\n";
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
@@ -156,9 +157,9 @@ sub main
 
 	foreach (keys %gkg_list) {
 		if (exists $ds_list{$_}) {
-			printf "matches local file\n";
+			printf "\tLOCAL:  $_\n";
 		} else {
-			printf "need to delete: $_\n";
+			printf "\tDELETE: $_\n";
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
 			delete_ds ($domain, $gkg->{'digest'});
@@ -168,6 +169,6 @@ sub main
 	return 0;
 }
 
-
-exit main();
+synchronise('flatcap.org');
+synchronise('russon.org');
 
