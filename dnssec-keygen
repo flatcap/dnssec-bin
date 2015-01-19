@@ -9,21 +9,20 @@ my $dnssec_keygen = '/usr/sbin/dnssec-keygen';
 
 ## Parse args
 
-my( $zone, $year, $month ) = @ARGV;
+my ($zone, $year, $month) = @ARGV;
 die "Bad zone\n"  unless defined $zone  && $zone  =~ /^[-a-z0-9\.]+$/i;
 die "Bad year\n"  unless defined $year  && $year  =~ /^\d\d\d\d+$/;
 die "Bad month\n" unless defined $month && $month =~ /^(0?[1-9]|1[012])$/;
 
 ## Build the command to execute
 
-# -a NSEC3RSASHA1 -b 2048
-my $command = sprintf('%s -P %s -A %s -I %s -D %s %s',
+my $command = sprintf ('%s -a NSEC3RSASHA1 -b 2048 -K keys -P %s -A %s -I %s -D %s %s',
 	$dnssec_keygen,
-	datetime( $year, $month,   3 ),
-	datetime( $year, $month,   5 ),
-	datetime( $year, $month+1, 5 ),
-	datetime( $year, $month+1, 7 ),
-	lc( $zone ),
+	datetime ($year, $month,   3),
+	datetime ($year, $month,   5),
+	datetime ($year, $month+1, 5),
+	datetime ($year, $month+1, 7),
+	lc ($zone),
 );
 
 ## Execute the command
@@ -34,15 +33,15 @@ system $command;
 ## Convert year/month/day/changeover to an appropriate datetime argument
 
 sub datetime {
-	my( $year, $month, $mday ) = @_;
+	my ($year, $month, $mday) = @_;
 
-	if( $month == 13 ){
+	if ($month == 13) {
 		++$year;
 		$month = 1;
 	}
 
 	$changeover =~ s/://g;
 
-	return sprintf('%s%02d%02d%s', $year, $month, $mday, $changeover );
+	return sprintf ('%s%02d%02d%s', $year, $month, $mday, $changeover);
 }
 
