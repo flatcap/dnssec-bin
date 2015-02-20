@@ -11,11 +11,11 @@ ionice --class 3     --pid $$ > /dev/null
 cd /var/named
 
 rm -f *.signed
-rm -f *.tlsa.db
+rm -f *.tlsa.inc
 rm -f data/*
-rm -f dns-glue.db
+rm -f dns-glue.inc
 rm -f dynamic/*
 rm -f keys/*
 rm -f named.ca
-rm -f ssh-fingerprint.db
+rm -f ssh-fingerprint.inc
 
