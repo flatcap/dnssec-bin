@@ -9,7 +9,7 @@ use REST::Client;
 use MIME::Base64;
 
 my $username = 'flatcap';
-my $password = 'ha2meiChu8';
+my $password = '5NTzmPBUlhnlRwCe';
 
 sub get_files
 {
@@ -134,16 +134,16 @@ sub synchronise
 	print "$domain:\n";
 
 	my %ds_list = get_files ($domain);
+	# print Dumper (%ds_list);
 	if (!%ds_list) {
 		return 1
 	}
-	# print Dumper (%ds_list);
 
 	my %gkg_list = get_gkg ($domain);
+	print Dumper (%gkg_list);
 	if (!%gkg_list) {
-		return 1;
+		# return 1;
 	}
-	# print Dumper (%gkg_list);
 
 	foreach (keys %ds_list) {
 		if (exists $gkg_list{$_}) {

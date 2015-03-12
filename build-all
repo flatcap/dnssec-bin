@@ -19,12 +19,14 @@ bin/generate-dns-glue
 bin/generate-root-certs
 bin/generate-ssh-fingerprint
 
-bin/generate-ksk flatcap.org 2014 11
-bin/generate-ksk russon.org 2014 11
-bin/generate-zsk flatcap.org 2014 11
-bin/generate-zsk flatcap.org 2014 12
-bin/generate-zsk russon.org 2014 11
-bin/generate-zsk russon.org 2014 12
+bin/generate-ksk flatcap.org 2015 01
+bin/generate-ksk russon.org  2015 01
+
+bin/generate-zsk flatcap.org 2015 02
+bin/generate-zsk flatcap.org 2015 03
+
+bin/generate-zsk russon.org  2015 02
+bin/generate-zsk russon.org  2015 03
 
 bin/generate-tlsa
 bin/update-serials russon.org.db
