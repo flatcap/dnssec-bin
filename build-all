@@ -22,13 +22,15 @@ bin/generate-ssh-fingerprint
 bin/generate-ksk flatcap.org 2015 01
 bin/generate-ksk russon.org  2015 01
 
-bin/generate-zsk flatcap.org 2015 02
 bin/generate-zsk flatcap.org 2015 03
+bin/generate-zsk flatcap.org 2015 04
 
-bin/generate-zsk russon.org  2015 02
 bin/generate-zsk russon.org  2015 03
+bin/generate-zsk russon.org  2015 04
 
 bin/generate-tlsa
+bin/update-serials flatcap.org.db
+bin/update-serials flatcap.xyz.db
 bin/update-serials russon.org.db
 
 bin/sign-zone flatcap.org
