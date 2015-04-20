@@ -12,6 +12,8 @@ cd /var/named
 
 KEYDIR=keys
 mkdir -p $KEYDIR
+mkdir -p data
+mkdir -p dynamic
 
 bin/clean-all
 
