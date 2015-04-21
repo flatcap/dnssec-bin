@@ -20,15 +20,16 @@ $Data::Dumper::Useqq     = 1;
 $Data::Dumper::Quotekeys = 0;
 $Data::Dumper::Sortkeys  = 1;
 
-Readonly my $username => 'flatcap';
-Readonly my $password => '5NTzmPBUlhnlRwCe';
-Readonly my $host     => 'https://www.gkg.net';
+Readonly my $USERNAME => 'flatcap';
+Readonly my $PASSWORD => '5NTzmPBUlhnlRwCe';
+Readonly my $HOST     => 'https://www.gkg.net';
 
 sub get_inactive_date
 {
 	my ($file) = @_;
 
-	Readonly my $FIELDS => 7;
+	Readonly my $FIELDS     => 7;
+	Readonly my $DATE_CHARS => 8;
 
 	my $FH;
 	if (!open $FH, '<', $file) {
@@ -38,9 +39,8 @@ sub get_inactive_date
 
 	my $match;
 	while (<$FH>) {
-		chomp;
-		if ($_ =~ /Inactive: (\d+)/) {
-			$match = substr $1, 0, 8;
+		if (/Inactive:\s(\d+)/msx) {
+			$match = substr $1, 0, $DATE_CHARS;
 			last;
 		}
 	}
@@ -60,7 +60,7 @@ sub get_files
 
 	my $keydir = 'keys';
 	my $file   = "$keydir/dsset-$domain.";
-	my $now    = strftime ("%Y%m%d", localtime());
+	my $now    = strftime '%Y%m%d', localtime;
 	my %ds_list;
 
 	my $FH;
@@ -74,17 +74,17 @@ sub get_files
 		my ($zone, $class, $rr, $key, $algo, $dtype, $digest) = split /\s+/msx, $_, $FIELDS;
 		$digest =~ s/\s//msxg;
 
-		my $key_file = sprintf "%s/K%s.+%03d+%05d.key", $keydir, $domain, $algo, $key;
-		my $date = get_inactive_date ($key_file);
+		my $key_file = sprintf '%s/K%s.+%03d+%05d.key', $keydir, $domain, $algo, $key;
+		my $date   = get_inactive_date ($key_file);
 		my $format = '%Y%m%d';
-		my $diff = Time::Piece->strptime($date, $format) - Time::Piece->strptime($now, $format);
+		my $diff   = Time::Piece->strptime ($date, $format) - Time::Piece->strptime ($now, $format);
 
 		$ds_list{$digest} = {
 			keyTag     => $key,
 			algorithm  => $algo,
 			digestType => $dtype,
 			digest     => $digest,
-			maxSigLife => int ($diff)
+			maxSigLife => int $diff
 		};
 	}
 
@@ -101,11 +101,11 @@ sub get_gkg
 	my $url      = "/ws/domain/$domain/ds";
 	my $headers  = {
 		Accept => 'application/json',
-		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
+		Authorization => 'Basic ' . encode_base64 ($USERNAME . q{:} . $PASSWORD)
 	};
 
 	my $client = REST::Client->new ();
-	$client->setHost ($host);
+	$client->setHost ($HOST);
 
 	$client->GET ($url, $headers);
 
@@ -134,13 +134,13 @@ sub create_ds
 
 	my $headers = {
 		Accept => 'application/json',
-		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
+		Authorization => 'Basic ' . encode_base64 ($USERNAME . q{:} . $PASSWORD)
 	};
 	my $client = REST::Client->new ();
-	$client->setHost ($host);
+	$client->setHost ($HOST);
 
 	my $body = "{ \"digest\":\"$ds->{'digest'}\", \"digestType\":\"$ds->{'digestType'}\", \"algorithm\":\"$ds->{'algorithm'}\", \"keyTag\":\"$ds->{'keyTag'}\", \"maxSigLife\":\"$ds->{'maxSigLife'}\" }";
-	# print "host = $host\n";
+	# print "host = $HOST\n";
 	# print "url  = $url\n";
 	# print "body = $body\n";
 
@@ -168,10 +168,10 @@ sub delete_ds
 
 	my $headers = {
 		Accept => 'application/json',
-		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
+		Authorization => 'Basic ' . encode_base64 ($USERNAME . q{:} . $PASSWORD)
 	};
 	my $client = REST::Client->new ();
-	$client->setHost ($host);
+	$client->setHost ($HOST);
 
 	my $url = "/ws/domain/$domain/ds/$digest";
 
