@@ -35,7 +35,12 @@ sub get_files
 		chomp;
 		my ($zone, $class, $rr, $key, $algo, $dtype, $digest) = split /\s+/msx, $_, $FIELDS;
 		$digest =~ s/\s//msxg;
-		$ds_list{$digest} = {keyTag => $key, algorithm => $algo, digestType => $dtype, digest => $digest};
+		$ds_list{$digest} = {
+			keyTag     => $key,
+			algorithm  => $algo,
+			digestType => $dtype,
+			digest     => $digest
+		};
 	}
 
 	if (!close $FH) {
@@ -52,12 +57,8 @@ sub get_gkg
 	my $url      = "/ws/domain/$domain/ds";
 	my $headers = {
 		Accept        => 'application/json',
-		Authorization => 'Basic ' . encode_base64 ($username . ':' . $password)
+		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
 	};
-
-	print Dumper $host;
-	print Dumper $url;
-	print Dumper $headers;
 
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
@@ -87,7 +88,10 @@ sub create_ds
 	my $host = 'https://www.gkg.net';
 	my $url  = "/ws/domain/$domain/ds";
 
-	my $headers = {Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)};
+	my $headers = {
+		Accept        => 'application/json',
+		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
+	};
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
 
@@ -121,7 +125,10 @@ sub delete_ds
 	my $host = 'https://www.gkg.net';
 	my $url  = "/ws/domain/$domain/ds";
 
-	my $headers = {Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)};
+	my $headers = {
+		Accept        => 'application/json',
+		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
+	};
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
 
@@ -149,13 +156,13 @@ sub synchronise
 	printf "$domain:\n";
 
 	my %ds_list = get_files ($domain);
-	# print Dumper (%ds_list);
+	print Dumper (\%ds_list);
 	if (!%ds_list) {
 		return 1
 	}
 
 	my %gkg_list = get_gkg ($domain);
-	printf Dumper (%gkg_list);
+	printf Dumper (\%gkg_list);
 	if (!%gkg_list) {
 		# return 1;
 	}
@@ -166,7 +173,7 @@ sub synchronise
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
-			# create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
+			create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
 		}
 	}
 
@@ -177,7 +184,7 @@ sub synchronise
 			printf "\tDELETE: $_\n";
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
-			# delete_ds ($domain, $gkg->{'digest'});
+			delete_ds ($domain, $gkg->{'digest'});
 		}
 	}
 
@@ -185,6 +192,6 @@ sub synchronise
 }
 
 
-# synchronise ('flatcap.org');
+synchronise ('flatcap.org');
 synchronise ('russon.org');
 
