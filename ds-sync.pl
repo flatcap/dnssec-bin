@@ -27,7 +27,7 @@ sub get_files
 
 	my $FH;
 	if (!open $FH, '<', $file) {
-		printf STDERR "Can't open $file: $ERRNO\n";
+		printf {*STDERR} "Can't open $file: $ERRNO\n";
 		return;
 	}
 
@@ -55,8 +55,8 @@ sub get_gkg
 	my ($domain) = @_;
 	my $host     = 'https://www.gkg.net';
 	my $url      = "/ws/domain/$domain/ds";
-	my $headers = {
-		Accept        => 'application/json',
+	my $headers  = {
+		Accept => 'application/json',
 		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
 	};
 
@@ -67,7 +67,7 @@ sub get_gkg
 
 	my $code = $client->responseCode ();
 	if ($code ne '200') {
-		printf STDERR "Can't get info from gkg: $code\n";
+		printf {*STDERR} "Can't get info from gkg: $code\n";
 		return;
 	}
 
@@ -89,7 +89,7 @@ sub create_ds
 	my $url  = "/ws/domain/$domain/ds";
 
 	my $headers = {
-		Accept        => 'application/json',
+		Accept => 'application/json',
 		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
 	};
 	my $client = REST::Client->new ();
@@ -110,7 +110,7 @@ sub create_ds
 
 	my $code = $client->responseCode ();
 	if ($code ne '201') {
-		printf STDERR "Create failed: $code\n";
+		printf {*STDERR} "Create failed: $code\n";
 		return;
 	}
 
@@ -126,7 +126,7 @@ sub delete_ds
 	my $url  = "/ws/domain/$domain/ds";
 
 	my $headers = {
-		Accept        => 'application/json',
+		Accept => 'application/json',
 		Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)
 	};
 	my $client = REST::Client->new ();
@@ -142,7 +142,7 @@ sub delete_ds
 
 	my $code = $client->responseCode ();
 	if ($code ne '204') {
-		printf STDERR "Delete failed: $code\n";
+		printf {*STDERR} "Delete failed: $code\n";
 		return;
 	}
 
@@ -156,13 +156,13 @@ sub synchronise
 	printf "$domain:\n";
 
 	my %ds_list = get_files ($domain);
-	print Dumper (\%ds_list);
+	printf {*STDOUT} Dumper (\%ds_list);
 	if (!%ds_list) {
 		return 1
 	}
 
 	my %gkg_list = get_gkg ($domain);
-	printf Dumper (\%gkg_list);
+	printf {*STDOUT} Dumper (\%gkg_list);
 	if (!%gkg_list) {
 		# return 1;
 	}
