@@ -27,7 +27,7 @@ sub get_files
 
 	my $FH;
 	if (!open $FH, '<', $file) {
-		printf {STDERR} "Can't open $file: $ERRNO\n";
+		printf STDERR "Can't open $file: $ERRNO\n";
 		return;
 	}
 
@@ -50,7 +50,14 @@ sub get_gkg
 	my ($domain) = @_;
 	my $host     = 'https://www.gkg.net';
 	my $url      = "/ws/domain/$domain/ds";
-	my $headers = {Accept => 'application/json', Authorization => 'Basic ' . encode_base64 ($username . q{:} . $password)};
+	my $headers = {
+		Accept        => 'application/json',
+		Authorization => 'Basic ' . encode_base64 ($username . ':' . $password)
+	};
+
+	print Dumper $host;
+	print Dumper $url;
+	print Dumper $headers;
 
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
@@ -59,7 +66,7 @@ sub get_gkg
 
 	my $code = $client->responseCode ();
 	if ($code ne '200') {
-		printf {STDERR} "Can't get info from gkg: $code\n";
+		printf STDERR "Can't get info from gkg: $code\n";
 		return;
 	}
 
@@ -99,7 +106,7 @@ sub create_ds
 
 	my $code = $client->responseCode ();
 	if ($code ne '201') {
-		printf {STDERR} "Create failed: $code\n";
+		printf STDERR "Create failed: $code\n";
 		return;
 	}
 
@@ -128,7 +135,7 @@ sub delete_ds
 
 	my $code = $client->responseCode ();
 	if ($code ne '204') {
-		printf {STDERR} "Delete failed: $code\n";
+		printf STDERR "Delete failed: $code\n";
 		return;
 	}
 
@@ -148,7 +155,7 @@ sub synchronise
 	}
 
 	my %gkg_list = get_gkg ($domain);
-	# printf Dumper (%gkg_list);
+	printf Dumper (%gkg_list);
 	if (!%gkg_list) {
 		# return 1;
 	}
@@ -159,7 +166,7 @@ sub synchronise
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
-			create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
+			# create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
 		}
 	}
 
@@ -170,13 +177,14 @@ sub synchronise
 			printf "\tDELETE: $_\n";
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
-			delete_ds ($domain, $gkg->{'digest'});
+			# delete_ds ($domain, $gkg->{'digest'});
 		}
 	}
 
 	return 0;
 }
 
-synchronise ('flatcap.org');
+
+# synchronise ('flatcap.org');
 synchronise ('russon.org');
 
