@@ -11,9 +11,46 @@ use REST::Client;
 use MIME::Base64;
 use English '-no_match_vars';
 use Readonly;
+use DateTime::Format::ISO8601;
+use Time::Piece;
+use POSIX qw(strftime);
 
-my $username = 'flatcap';
-my $password = '5NTzmPBUlhnlRwCe';
+$Data::Dumper::Indent    = 2;
+$Data::Dumper::Useqq     = 1;
+$Data::Dumper::Quotekeys = 0;
+$Data::Dumper::Sortkeys  = 1;
+
+Readonly my $username => 'flatcap';
+Readonly my $password => '5NTzmPBUlhnlRwCe';
+Readonly my $host     => 'https://www.gkg.net';
+
+sub get_inactive_date
+{
+	my ($file) = @_;
+
+	Readonly my $FIELDS => 7;
+
+	my $FH;
+	if (!open $FH, '<', $file) {
+		printf {*STDERR} "Can't open $file: $ERRNO\n";
+		return;
+	}
+
+	my $match;
+	while (<$FH>) {
+		chomp;
+		if ($_ =~ /Inactive: (\d+)/) {
+			$match = substr $1, 0, 8;
+			last;
+		}
+	}
+
+	if (!close $FH) {
+		printf "Close failed for: %s\n", $file;
+	}
+
+	return $match;
+}
 
 sub get_files
 {
@@ -23,6 +60,7 @@ sub get_files
 
 	my $keydir = 'keys';
 	my $file   = "$keydir/dsset-$domain.";
+	my $now    = strftime ("%Y%m%d", localtime());
 	my %ds_list;
 
 	my $FH;
@@ -35,11 +73,18 @@ sub get_files
 		chomp;
 		my ($zone, $class, $rr, $key, $algo, $dtype, $digest) = split /\s+/msx, $_, $FIELDS;
 		$digest =~ s/\s//msxg;
+
+		my $key_file = sprintf "%s/K%s.+%03d+%05d.key", $keydir, $domain, $algo, $key;
+		my $date = get_inactive_date ($key_file);
+		my $format = '%Y%m%d';
+		my $diff = Time::Piece->strptime($date, $format) - Time::Piece->strptime($now, $format);
+
 		$ds_list{$digest} = {
 			keyTag     => $key,
 			algorithm  => $algo,
 			digestType => $dtype,
-			digest     => $digest
+			digest     => $digest,
+			maxSigLife => int ($diff)
 		};
 	}
 
@@ -53,7 +98,6 @@ sub get_files
 sub get_gkg
 {
 	my ($domain) = @_;
-	my $host     = 'https://www.gkg.net';
 	my $url      = "/ws/domain/$domain/ds";
 	my $headers  = {
 		Accept => 'application/json',
@@ -81,12 +125,12 @@ sub get_gkg
 	return %gkg_list;
 }
 
+
 sub create_ds
 {
-	my ($domain, $key, $algo, $dtype, $digest) = @_;
+	my ($domain, $ds) = @_;
 
-	my $host = 'https://www.gkg.net';
-	my $url  = "/ws/domain/$domain/ds";
+	my $url = "/ws/domain/$domain/ds";
 
 	my $headers = {
 		Accept => 'application/json',
@@ -95,7 +139,7 @@ sub create_ds
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
 
-	my $body = "{ \"digest\":\"$digest\", \"digestType\":\"$dtype\", \"algorithm\":\"$algo\", \"keyTag\":\"$key\", \"maxSigLife\":\"3456000\" }";
+	my $body = "{ \"digest\":\"$ds->{'digest'}\", \"digestType\":\"$ds->{'digestType'}\", \"algorithm\":\"$ds->{'algorithm'}\", \"keyTag\":\"$ds->{'keyTag'}\", \"maxSigLife\":\"$ds->{'maxSigLife'}\" }";
 	# print "host = $host\n";
 	# print "url  = $url\n";
 	# print "body = $body\n";
@@ -114,16 +158,13 @@ sub create_ds
 		return;
 	}
 
-	printf "create succeeded: $digest\n";
+	printf "create succeeded: $ds->{'digest'}\n";
 	return 1;
 }
 
 sub delete_ds
 {
 	my ($domain, $digest) = @_;
-
-	my $host = 'https://www.gkg.net';
-	my $url  = "/ws/domain/$domain/ds";
 
 	my $headers = {
 		Accept => 'application/json',
@@ -132,7 +173,8 @@ sub delete_ds
 	my $client = REST::Client->new ();
 	$client->setHost ($host);
 
-	$url .= "/$digest";
+	my $url = "/ws/domain/$domain/ds/$digest";
+
 	$client->DELETE ($url, $headers);
 	# Responses:
 	#	204 No Content
@@ -156,13 +198,13 @@ sub synchronise
 	printf "$domain:\n";
 
 	my %ds_list = get_files ($domain);
-	printf {*STDOUT} Dumper (\%ds_list);
+	# printf {*STDOUT} Dumper (\%ds_list);
 	if (!%ds_list) {
 		return 1
 	}
 
 	my %gkg_list = get_gkg ($domain);
-	printf {*STDOUT} Dumper (\%gkg_list);
+	# printf {*STDOUT} Dumper (\%gkg_list);
 	if (!%gkg_list) {
 		# return 1;
 	}
@@ -173,7 +215,7 @@ sub synchronise
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
-			create_ds ($domain, $ds->{'keyTag'}, $ds->{'algorithm'}, $ds->{'digestType'}, $ds->{'digest'});
+			create_ds ($domain, $ds);
 		}
 	}
 
@@ -181,7 +223,6 @@ sub synchronise
 		if (exists $ds_list{$_}) {
 			printf "\tLOCAL:  $_\n";
 		} else {
-			printf "\tDELETE: $_\n";
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
 			delete_ds ($domain, $gkg->{'digest'});
