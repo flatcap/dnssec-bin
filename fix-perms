@@ -10,10 +10,10 @@ ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
-# cd /var/named
+cd /var/named
 
-# chown --recursive root.named .
-# chown --recursive named.named data
+chown --recursive root.named .
+chown --recursive named.named data
 
 chmod --recursive u+rw,g+rX,o-rwx .
 chmod --recursive g+w data dynamic
