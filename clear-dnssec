@@ -9,7 +9,7 @@ set -o nounset	# set -u
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
-# cd /var/named
+cd /var/named
 
 # edit named config
 #	disable inclusion of   signed domain
