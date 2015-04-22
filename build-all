@@ -42,5 +42,21 @@ bin/sign-zone russon.org
 
 bin/set-to-publish-date.sh keys/*
 bin/fix-perms
-ls -ltr $KEYDIR
+
+echo
+echo -e "\e[1;32mKSKs\e[0m"
+ls -1 -tr  keys/*.key | while read x; do
+	grep -q "key-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+
+echo
+echo -e "\e[1;32mZSKs\e[0m"
+ls -1 -tr  keys/*.key | while read x; do
+	grep -q "zone-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+
 
