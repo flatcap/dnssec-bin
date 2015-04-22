@@ -5,6 +5,8 @@ PATH="/usr/bin:/usr/sbin"
 set -o errexit	# set -e
 set -o nounset	# set -u
 
+shopt -s nullglob
+
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
@@ -20,6 +22,11 @@ bin/generate-dns-glue
 bin/generate-root-certs
 bin/generate-ssh-fingerprint
 
+bin/generate-tlsa
+bin/update-serials flatcap.org.db
+bin/update-serials flatcap.xyz.db
+bin/update-serials russon.org.db
+
 X=$(date "+%Y%m" -d "1 month ago")
 START_YEAR=${X:0:4}
 START_MONTH=${X:4}
@@ -31,12 +38,33 @@ bin/generate-ksk "$ZONE" $START_YEAR $START_MONTH
 bin/generate-ksk "$ZONE" $MID_YEAR   $MID_MONTH
 
 MONTHLY=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -3 months")
-echo "MONTHLY = $MONTHLY"
 for i in {1..5}; do
 	X=$(date "+%Y%m" -d "${MONTHLY} +$i months")
-	bin/dnssec-keygen "$ZONE" "${X:0:4}" "${X:4}"
+	bin/generate-zsk "$ZONE" "${X:0:4}" "${X:4}"
 done
 
 bin/set-to-publish-date.sh keys/*
-ls -ltr $KEYDIR
+
+echo
+echo -e "\e[1;32mKSKs\e[0m"
+ls -1 -tr  keys/*.key | while read x; do
+	grep -q "key-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+
+echo
+echo -e "\e[1;32mZSKs\e[0m"
+ls -1 -tr  keys/*.key | while read x; do
+	grep -q "zone-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+
+DEMO_START=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -2 months")
+DEMO_END=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 3 months")
+
+echo
+echo bin/demo-run $DEMO_START $DEMO_END
+echo
 

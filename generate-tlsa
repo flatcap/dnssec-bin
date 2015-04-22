@@ -10,6 +10,8 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
+echo -e "\e[1;32mGenerate TLSA Records for Services\e[0m"
+
 for ZONE in flatcap.org russon.org; do
 	(
 	echo '; TLSA records for services'

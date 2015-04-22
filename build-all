@@ -21,6 +21,11 @@ bin/generate-dns-glue
 bin/generate-root-certs
 bin/generate-ssh-fingerprint
 
+bin/generate-tlsa
+bin/update-serials flatcap.org.db
+bin/update-serials flatcap.xyz.db
+bin/update-serials russon.org.db
+
 START=$(date "+%Y %m")
 NEXT=$(date "+%Y %m" -d "1 month")
 
@@ -31,11 +36,6 @@ bin/generate-zsk flatcap.org $NEXT
 bin/generate-ksk russon.org  $START
 bin/generate-zsk russon.org  $START
 bin/generate-zsk russon.org  $NEXT
-
-bin/generate-tlsa
-bin/update-serials flatcap.org.db
-bin/update-serials flatcap.xyz.db
-bin/update-serials russon.org.db
 
 bin/sign-zone flatcap.org
 bin/sign-zone russon.org

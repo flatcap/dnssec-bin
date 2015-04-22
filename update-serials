@@ -41,10 +41,10 @@ done
 
 : $((SERIAL++))
 
-echo "$SERIAL"
+echo -e "\e[1;32mUpdate zone file serial numbers\e[0m"
 for FILE in ${FILE_LIST[@]}; do
 	ZONE="${FILE%.db}"
 	sed -i "s/\<[0-9]\{10\}\>/$SERIAL/" $FILE
-	echo -e "\t$ZONE"
+	echo -e "\t$ZONE" "$SERIAL"
 done
 

@@ -20,3 +20,5 @@ rm -fr data
 rm -fr dynamic
 rm -fr keys
 
+rm -fr 201[456]*/
+

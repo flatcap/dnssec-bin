@@ -10,6 +10,8 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
+echo -e "\e[1;32mGenerate SSH Fingerprints\e[0m"
+
 (
 	echo '; SSH fingerprints'
 	ssh-keygen -r @

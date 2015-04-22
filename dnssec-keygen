@@ -1,6 +1,11 @@
 #!/usr/bin/perl
+
 use strict;
 use warnings;
+
+use Readonly;
+
+our $VERSION = 0.1;
 
 ## Configuration
 
@@ -10,38 +15,50 @@ my $dnssec_keygen = '/usr/sbin/dnssec-keygen';
 ## Parse args
 
 my ($zone, $year, $month) = @ARGV;
-die "Bad zone\n"  unless defined $zone  && $zone  =~ /^[-a-z0-9\.]+$/i;
-die "Bad year\n"  unless defined $year  && $year  =~ /^\d\d\d\d+$/;
-die "Bad month\n" unless defined $month && $month =~ /^(0?[1-9]|1[012])$/;
+defined $zone  || die "Bad zone\n";
+defined $year  || die "Bad year\n";
+defined $month || die "Bad month\n";
+
+$zone =~ /^[-[:lower:]\d.]+$/msxi;
+$year =~ /^\d\d\d\d+$/msx;
+$month =~ /^(0?[1-9]|1[012])$/msx;
 
 ## Build the command to execute
 
-my $command = sprintf ('%s -a NSEC3RSASHA1 -b 2048 -K keys -P %s -A %s -I %s -D %s %s',
-	$dnssec_keygen,
-	datetime ($year, $month,   3),
-	datetime ($year, $month,   5),
-	datetime ($year, $month+1, 5),
-	datetime ($year, $month+1, 7),
-	lc ($zone),
-);
+Readonly my $P_DAY => 3;
+Readonly my $A_DAY => 5;
+Readonly my $I_DAY => 5;
+Readonly my $D_DAY => 7;
+
+my $command =
+  sprintf '%s -a NSEC3RSASHA1 -b 2048 -K keys -P %s -A %s -I %s -D %s %s',
+  $dnssec_keygen,
+  datetime ($year, $month,     $P_DAY),
+  datetime ($year, $month,     $A_DAY),
+  datetime ($year, $month + 1, $I_DAY),
+  datetime ($year, $month + 1, $D_DAY),
+  lc $zone;
 
 ## Execute the command
 
 print "Executing: $command\n";
+printf "\e[1;32mCreating Zone-Signing Key for $year-$month\e[0m\n";
 system $command;
 
 ## Convert year/month/day/changeover to an appropriate datetime argument
 
 sub datetime {
-	my ($year, $month, $mday) = @_;
+	my ($y, $m, $d) = @_;
 
-	if ($month == 13) {
-		++$year;
-		$month = 1;
+	Readonly my $MONTHS => 12;
+
+	if ($m > $MONTHS) {
+		++$y;
+		$m = 1;
 	}
 
-	$changeover =~ s/://g;
+	$changeover =~ s/://msxg;
 
-	return sprintf ('%s%02d%02d%s', $year, $month, $mday, $changeover);
+	return sprintf '%s%02d%02d%s', $y, $m, $d, $changeover;
 }
 

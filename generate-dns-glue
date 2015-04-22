@@ -10,6 +10,8 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
+echo -e "\e[1;32mGenerate DNS Glue\e[0m"
+
 (
 	echo '; Maintain glue to our external dns'
 	for i in {1..5}; do

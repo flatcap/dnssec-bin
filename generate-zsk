@@ -10,6 +10,8 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
+echo -e "\e[1;32mGenerate Zone-Signing Key\e[0m"
+
 if [ ! $# = 1 -a ! $# = 3 ]; then
 	echo "Usage: ${0##*/} ZONE [YEAR MONTH]"
 	exit 1
@@ -36,5 +38,5 @@ D="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 KEYDIR=keys
 mkdir -p $KEYDIR
 
-dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE -K $KEYDIR -P $P -A $A -I $I -D $D $ZONE
+dnssec-keygen -a NSEC3RSASHA1 -n ZONE -K $KEYDIR -b 2048 -P $P -A $A -I $I -D $D $ZONE
 
