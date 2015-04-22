@@ -12,5 +12,3 @@ cd /var/named
 
 dig +norecurse +nostats +nocomments +nocmd @a.root-servers.net | grep -v "^;" | LANG=C sort > named.ca
 
-bin/fix-perms
-

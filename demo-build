@@ -10,33 +10,69 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-KEYDIR=keys
-ZONE=russon.org
+KEYDIR="keys"
+ZONE="russon.org"
 
-mkdir -p $KEYDIR
-rm -fr $KEYDIR/*
+bin/clean-all
+mkdir -p "$KEYDIR"
 
-P=$(date -d "Jun 14 2014" "+%Y%m%d%H%M%S")
-A=$(date -d "Jun 16 2014" "+%Y%m%d%H%M%S")
-I=$(date -d "Dec 16 2014" "+%Y%m%d%H%M%S")
-D=$(date -d "Dec 18 2014" "+%Y%m%d%H%M%S")
+bin/generate-dns-glue
+bin/generate-root-certs
+bin/generate-ssh-fingerprint
+
+P_DAY=14
+A_DAY=$((P_DAY+2))
+I_DAY=$A_DAY
+D_DAY=$((A_DAY+2))
+
+TIME_BASE="060000"
+
+X=$(date "+%Y%m" -d "1 month ago")
+START_YEAR=${X:0:4}
+START_MONTH=${X:4}
+X=$(date "+%Y%m" -d "5 months")
+MID_YEAR=${X:0:4}
+MID_MONTH=${X:4}
+X=$(date "+%Y%m" -d "11 months")
+END_YEAR=${X:0:4}
+END_MONTH=${X:4}
+
+# echo "START_MONTH = $START_MONTH"
+# echo "START_YEAR  = $START_YEAR"
+# echo "MID_MONTH   = $MID_MONTH"
+# echo "MID_YEAR    = $MID_YEAR"
+# echo "END_MONTH   = $END_MONTH"
+# echo "END_YEAR    = $END_YEAR"
 
 # Create a Key Signing Key (KSK)
+P="$START_YEAR$START_MONTH$P_DAY$TIME_BASE"
+A="$START_YEAR$START_MONTH$A_DAY$TIME_BASE"
+I="$MID_YEAR$MID_MONTH$I_DAY$TIME_BASE"
+D="$MID_YEAR$MID_MONTH$D_DAY$TIME_BASE"
+# echo P=$P
+# echo A=$A
+# echo I=$I
+# echo D=$D
 /usr/sbin/dnssec-keygen -P $P -A $A -I $I -D $D -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK $ZONE
-
-P=$(date -d "Dec 14 2014" "+%Y%m%d%H%M%S")
-A=$(date -d "Dec 16 2014" "+%Y%m%d%H%M%S")
-I=$(date -d "Jun 16 2015" "+%Y%m%d%H%M%S")
-D=$(date -d "Jun 18 2015" "+%Y%m%d%H%M%S")
 
 # Create a Key Signing Key (KSK)
+P="$MID_YEAR$MID_MONTH$P_DAY$TIME_BASE"
+A="$MID_YEAR$MID_MONTH$A_DAY$TIME_BASE"
+I="$END_YEAR$END_MONTH$I_DAY$TIME_BASE"
+D="$END_YEAR$END_MONTH$D_DAY$TIME_BASE"
+# echo P=$P
+# echo A=$A
+# echo I=$I
+# echo D=$D
 /usr/sbin/dnssec-keygen -P $P -A $A -I $I -D $D -a NSEC3RSASHA1 -b 4096 -n ZONE -K $KEYDIR -f KSK $ZONE
 
-bin/dnssec-keygen russon.org 2014 09
-bin/dnssec-keygen russon.org 2014 10
-bin/dnssec-keygen russon.org 2014 11
-bin/dnssec-keygen russon.org 2014 12
-bin/dnssec-keygen russon.org 2015 01
+MONTHLY=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -3 months")
+echo "MONTHLY = $MONTHLY"
+for i in {1..5}; do
+	X=$(date "+%Y%m" -d "${MONTHLY} +$i months")
+	bin/dnssec-keygen "$ZONE" "${X:0:4}" "${X:4}"
+done
 
-ls -l $KEYDIR
+bin/set-to-publish-date.sh keys/*
+ls -ltr $KEYDIR
 

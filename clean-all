@@ -12,10 +12,11 @@ cd /var/named
 
 rm -f *.signed
 rm -f *.tlsa.inc
-rm -f data/*
 rm -f dns-glue.inc
-rm -f dynamic/*
-rm -f keys/*
 rm -f named.ca
 rm -f ssh-fingerprint.inc
+
+rm -fr data
+rm -fr dynamic
+rm -fr keys
 

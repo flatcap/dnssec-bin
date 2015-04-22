@@ -13,10 +13,11 @@ shopt -s nullglob
 cd /var/named
 
 chown --recursive root.named .
-chown --recursive named.named data
+[ -d data ] && chown --recursive named.named data
 
 chmod --recursive u+rw,g+rX,o-rwx .
-chmod --recursive g+w data dynamic
+[ -d data ]    && chmod --recursive g+w data
+[ -d dynamic ] && chmod --recursive g+w dynamic
 
 # keys/ and .git* may not exist
 FILES=(*.git*)
