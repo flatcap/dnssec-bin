@@ -22,7 +22,7 @@ for ((i = $START; i < $END; i += 86400)); do
 	dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR $ZONE.db
 	dnssec-dsfromkey -K $DIR -f $ZONE.db.signed $ZONE > dsset-$ZONE.
 	mkdir $DIR
-	mv ${ZONE}.db.signed dsset-${ZONE}. $DIR
+	mv $ZONE.db.signed dsset-$ZONE. $DIR
 done
 
 hwclock --hctosys

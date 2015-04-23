@@ -23,7 +23,7 @@ mkdir -p $KEYDIR
 SALT=$(head -c 1000 /dev/random | sha1sum | cut -b 1-16)
 
 # Sign the zone, and write it out to a file named zone.signed
-echo -e "\e[1;32mSign zone $ZONE\e[0m"
-dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR ${ZONE}.db
-mv dsset-${ZONE}. $KEYDIR
+echo -e "\e[1;32mSign zone $ZONE\e[0m (Salt: $SALT)"
+dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR $ZONE.db
+mv dsset-$ZONE. $KEYDIR
 
