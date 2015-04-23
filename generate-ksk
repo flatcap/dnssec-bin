@@ -22,8 +22,8 @@ fi
 ZONE="$1"
 YEAR="${2:-$(date '+%Y')}"
 MONTH="${3:-$(date '+%m')}"
-DAY="03"
-TIME="060000"
+DAY="01"
+TIME="040000"
 VALID="6 months"
 
 P="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY - 2 days")$TIME"

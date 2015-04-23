@@ -39,10 +39,17 @@ generate-ksk "$ZONE" $MID_YEAR   $MID_MONTH
 
 MONTHLY=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -3 months")
 for i in {1..5}; do
-	X=$(date "+%Y%m" -d "${MONTHLY} +$i months")
+	X=$(date "+%Y%m" -d "$MONTHLY +$i months")
 	generate-zsk "$ZONE" "${X:0:4}" "${X:4}"
 done
 
 set-to-publish-date.sh "$KEYDIR"/*
 show-keys
+
+DEMO_START=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -2 months")
+DEMO_END=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 3 months")
+
+echo
+echo bin/demo-run $DEMO_START $DEMO_END
+echo
 
