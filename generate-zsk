@@ -22,7 +22,7 @@ YEAR="${2:-$(date '+%Y')}"
 MONTH="${3:-$(date '+%m')}"
 DAY="01"
 TIME="040000"
-VALID="1 month"
+VALID="1 month + 2 days"
 
 P="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY - 2 days")$TIME"
 A="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY")$TIME"
