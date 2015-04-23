@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH="/usr/bin:/usr/sbin"
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
 KEYDIR=keys
 
 set -o errexit	# set -e

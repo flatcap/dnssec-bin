@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
 KEYDIR=keys
 ZONE=russon.org
 
@@ -12,7 +14,7 @@ END=$(date "+%s" -d "$2")
 
 for ((i = $START; i < $END; i += 86400)); do
 	DIR=$(date -d @$i "+%Y%m%d")
-	DATE=$(date "+%m%d%H%M%Y" -d @$i)
+	DATE=$(date "+%m%d1000%Y" -d @$i)
 	echo
 	echo $DIR
 	date $DATE

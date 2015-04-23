@@ -1,5 +1,7 @@
 #!/bin/bash
 
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
 shopt -s nullglob
 
 for f in "$@"; do

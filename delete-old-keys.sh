@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH="/usr/bin:/usr/sbin"
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 set -o errexit	# set -e
 set -o nounset	# set -u

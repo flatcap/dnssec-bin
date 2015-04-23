@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH="/usr/bin:/usr/sbin"
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -15,32 +15,32 @@ mkdir -p $KEYDIR
 mkdir -p data
 mkdir -p dynamic
 
-bin/clean-all
+clean-all
 
-bin/generate-dns-glue
-bin/generate-root-certs
-bin/generate-ssh-fingerprint
+generate-dns-glue
+generate-root-certs
+generate-ssh-fingerprint
 
-bin/generate-tlsa
-bin/update-serials flatcap.org.db
-bin/update-serials flatcap.xyz.db
-bin/update-serials russon.org.db
+generate-tlsa
+update-serials flatcap.org.db
+update-serials flatcap.xyz.db
+update-serials russon.org.db
 
 START=$(date "+%Y %m")
 NEXT=$(date "+%Y %m" -d "1 month")
 
-bin/generate-ksk flatcap.org $START
-bin/generate-zsk flatcap.org $START
-bin/generate-zsk flatcap.org $NEXT
+generate-ksk flatcap.org $START
+generate-zsk flatcap.org $START
+generate-zsk flatcap.org $NEXT
 
-bin/generate-ksk russon.org  $START
-bin/generate-zsk russon.org  $START
-bin/generate-zsk russon.org  $NEXT
+generate-ksk russon.org  $START
+generate-zsk russon.org  $START
+generate-zsk russon.org  $NEXT
 
-bin/sign-zone flatcap.org
-bin/sign-zone russon.org
+sign-zone flatcap.org
+sign-zone russon.org
 
-bin/set-to-publish-date.sh "$KEYDIR"/*
-bin/fix-perms
-bin/show-keys
+set-to-publish-date.sh "$KEYDIR"/*
+fix-perms
+show-keys
 
