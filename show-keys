@@ -1,0 +1,33 @@
+#!/bin/bash
+
+PATH="/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+shopt -s nullglob
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+KEYDIR="keys"
+ZONE="russon.org"
+
+echo
+echo -e "\e[1;32mKSKs\e[0m"
+ls -1 -tr  "$KEYDIR"/*.key | while read x; do
+	grep -q "key-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+
+echo
+echo -e "\e[1;32mZSKs\e[0m"
+ls -1 -tr  "$KEYDIR"/*.key | while read x; do
+	grep -q "zone-signing" "$x" || continue
+	echo $x
+	grep -e Activate -e Inactive $x | sed 's/^/\t/'
+done
+

@@ -43,28 +43,6 @@ for i in {1..5}; do
 	bin/generate-zsk "$ZONE" "${X:0:4}" "${X:4}"
 done
 
-bin/set-to-publish-date.sh keys/*
-
-echo
-echo -e "\e[1;32mKSKs\e[0m"
-ls -1 -tr  keys/*.key | while read x; do
-	grep -q "key-signing" "$x" || continue
-	echo $x
-	grep -e Activate -e Inactive $x | sed 's/^/\t/'
-done
-
-echo
-echo -e "\e[1;32mZSKs\e[0m"
-ls -1 -tr  keys/*.key | while read x; do
-	grep -q "zone-signing" "$x" || continue
-	echo $x
-	grep -e Activate -e Inactive $x | sed 's/^/\t/'
-done
-
-DEMO_START=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -2 months")
-DEMO_END=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 3 months")
-
-echo
-echo bin/demo-run $DEMO_START $DEMO_END
-echo
+bin/set-to-publish-date.sh "$KEYDIR"/*
+bin/show-keys
 
