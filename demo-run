@@ -2,6 +2,8 @@
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
+export TZ=UTC
+
 KEYDIR=keys
 ZONE=russon.org
 
@@ -9,7 +11,7 @@ ZONE=russon.org
 
 rm -fr 201[456]*/
 
-START=$(date "+%s" -d "$1")
+START=$(date "+%s" -d "$1 +12 hours")
 END=$(date "+%s" -d "$2")
 
 for ((i = $START; i < $END; i += 86400)); do

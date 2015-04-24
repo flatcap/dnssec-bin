@@ -2,6 +2,8 @@
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
+export TZ=UTC
+
 set -o errexit	# set -e
 set -o nounset	# set -u
 
