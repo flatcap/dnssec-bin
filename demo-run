@@ -18,10 +18,11 @@ for ((i = $START; i < $END; i += 86400)); do
 	echo
 	echo $DIR
 	date $DATE
-	SALT=$(head -c 1000 /dev/random | sha1sum | cut -b 1-16)
-	dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR $ZONE.db
-	dnssec-dsfromkey -K $DIR -f $ZONE.db.signed $ZONE > dsset-$ZONE.
 	mkdir $DIR
+
+	sign-zone $ZONE
+
+	dnssec-dsfromkey -K $DIR -f $ZONE.db.signed $ZONE > dsset-$ZONE.
 	mv $ZONE.db.signed dsset-$ZONE. $DIR
 done
 
