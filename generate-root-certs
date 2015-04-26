@@ -12,5 +12,5 @@ cd /var/named
 
 echo -e "\e[1;32mGenerate Root Certificates\e[0m"
 
-dig +norecurse +nostats +nocomments +nocmd @a.root-servers.net | grep -v "^;" | LANG=C sort > named.ca
+dig +norecurse +nostats +nocomments +nocmd @a.root-servers.net | grep --invert-match "^;" | LANG=C sort > named.ca
 

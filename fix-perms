@@ -19,9 +19,9 @@ chmod --recursive u+rw,g+rX,o-rwx .
 [ -d data ]    && chmod --recursive g+w data
 [ -d dynamic ] && chmod --recursive g+w dynamic
 
-# keys/ and .git* may not exist
+# .git* may not exist
 FILES=(*.git*)
-[ -d keys ] && FILES+=('keys')
+[ -d "$DNSSEC_KEY_DIR" ] && FILES+=("$DNSSEC_KEY_DIR")
 [ ${#FILES[@]} -gt 0 ] && chmod --recursive og-rwx bin ${FILES[@]}
 
 chcon --recursive --user system_u --role object_r .

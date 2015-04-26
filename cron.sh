@@ -1,8 +1,5 @@
 #!/bin/bash
 
-DOMAINS="russon.org flatcap.org"
-KEYDIR="keys"
-
 KSK_MONTH1='04'
 KSK_MONTH2='10'
 SWAP_DAY='28'
@@ -11,7 +8,7 @@ SWAP_DAY='28'
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
-export TZ=UTC
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -37,7 +34,7 @@ echo "Cron: for $YEAR-$MONTH-$DAY"
 # KSK - 6 months
 
 if [ $MONTH$DAY = "${KSK_MONTH1}${SWAP_DAY}" -o $MONTH$DAY = "${KSK_MONTH2}${SWAP_DAY}" ]; then
-	for d in $DOMAINS; do
+	for d in $DNSSEC_DOMAINS; do
 		generate-ksk $d $YEAR $((MONTH+1))
 	done
 fi
@@ -46,7 +43,7 @@ fi
 # ZSK - 1 month
 
 if [ $DAY = "$SWAP_DAY" ]; then
-	for d in $DOMAINS; do
+	for d in $DNSSEC_DOMAINS; do
 		generate-zsk $d $YEAR $((MONTH+1))
 	done
 fi
@@ -61,7 +58,7 @@ generate-tlsa
 
 update-serials
 
-for d in $DOMAINS; do
+for d in $DNSSEC_DOMAINS; do
 	sign-zone $d
 done
 
@@ -70,7 +67,7 @@ done
 
 delete-old-keys
 fix-perms
-set-to-publish-date "$KEYDIR"/*
+set-to-publish-date "$DNSSEC_KEY_DIR"/*
 show-keys
 
 # ds-sync.pl

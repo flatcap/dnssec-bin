@@ -26,10 +26,10 @@ DAY="01"
 TIME="040000"
 VALID="6 months + 2 days"
 
-P="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY - 2 days")$TIME"
-A="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY")$TIME"
-I="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID")$TIME"
-D="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
+P="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY - 2 days")$TIME"
+A="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY")$TIME"
+I="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY + $VALID")$TIME"
+D="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 
 # echo P=$P
 # echo A=$A
@@ -37,8 +37,7 @@ D="$(date "+%Y%m%d" -d "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 # echo D=$D
 # exit
 
-KEYDIR=keys
-mkdir -p $KEYDIR
+mkdir --parents "$DNSSEC_KEY_DIR"
 
-dnssec-keygen -a NSEC3RSASHA1 -n ZONE -K $KEYDIR -b 4096 -f KSK -P $P -A $A -I $I -D $D $ZONE
+dnssec-keygen -a NSEC3RSASHA1 -n ZONE -K "$DNSSEC_KEY_DIR" -b 4096 -f KSK -P $P -A $A -I $I -D $D $ZONE
 

@@ -15,17 +15,16 @@ if [ $# != 1 ]; then
 	exit 1
 fi
 
-KEYDIR=keys
 ZONE=$1
 
-mkdir -p $KEYDIR
+mkdir --parents "$DNSSEC_KEY_DIR"
 
-SALT=$(head -c 1024 /dev/random | sha1sum)
+SALT=$(head --bytes 1024 /dev/random | sha1sum)
 SALT=${SALT:0:16}
 SALT=${SALT^^}
 
 # Sign the zone, and write it out to a file named zone.signed
 echo -e "\e[1;32mSign zone $ZONE\e[0m (Salt: $SALT)"
-dnssec-signzone -3 $SALT -S -o $ZONE -K $KEYDIR $ZONE.db
-mv dsset-$ZONE. $KEYDIR
+dnssec-signzone -3 $SALT -S -o $ZONE -K "$DNSSEC_KEY_DIR" $ZONE.db
+mv dsset-$ZONE. "$DNSSEC_KEY_DIR"
 

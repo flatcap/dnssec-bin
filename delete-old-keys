@@ -12,11 +12,9 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-KEYDIR="keys"
+[ -d "$DNSSEC_KEY_DIR" ] || exit 0
 
-[ -d "$KEYDIR" ] || exit 0
-
-FILES="$(find $KEYDIR -type f)"
+FILES="$(find "$DNSSEC_KEY_DIR" -type f)"
 
 DATE_NOW=$(date "+%Y%m%d%H%M%S")
 for f in $FILES; do
@@ -28,7 +26,7 @@ for f in $FILES; do
 
 	if [ $DATE_NOW -gt $EXPIRY ]; then
 		echo Delete: $f
-		rm -f "$f"
+		rm --force "$f"
 	else
 		echo Safe: $f
 	fi

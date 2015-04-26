@@ -14,42 +14,40 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-KEYDIR="keys"
 ZONE="russon.org"
 
 clean-all
-mkdir -p "$KEYDIR"
+mkdir --parents "$DNSSEC_KEY_DIR"
 
 generate-dns-glue
 generate-root-certs
 generate-ssh-fingerprint
-
 generate-tlsa
-update-serials flatcap.org.db
-update-serials flatcap.xyz.db
-update-serials russon.org.db
 
-X=$(date "+%Y%m" -d "1 month ago")
+update-serials
+
+X=$(date "+%Y%m" --date "1 month ago")
 START_YEAR=${X:0:4}
 START_MONTH=${X:4}
-X=$(date "+%Y%m" -d "5 months")
+
+X=$(date "+%Y%m" --date "5 months")
 MID_YEAR=${X:0:4}
 MID_MONTH=${X:4}
 
 generate-ksk "$ZONE" $START_YEAR $START_MONTH
 generate-ksk "$ZONE" $MID_YEAR   $MID_MONTH
 
-MONTHLY=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -3 months")
+MONTHLY=$(date "+%Y%m01" --date "$MID_YEAR-$MID_MONTH-01 -3 months")
 for i in {1..5}; do
-	X=$(date "+%Y%m" -d "$MONTHLY +$i months")
+	X=$(date "+%Y%m" --date "$MONTHLY +$i months")
 	generate-zsk "$ZONE" "${X:0:4}" "${X:4}"
 done
 
-set-to-publish-date.sh "$KEYDIR"/*
+set-to-publish-date "$DNSSEC_KEY_DIR"/*
 show-keys
 
-DEMO_START=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 -2 months")
-DEMO_END=$(date "+%Y%m01" -d "$MID_YEAR-$MID_MONTH-01 3 months")
+DEMO_START=$(date "+%Y%m01" --date "$MID_YEAR-$MID_MONTH-01 -2 months")
+DEMO_END=$(date "+%Y%m01" --date "$MID_YEAR-$MID_MONTH-01 3 months")
 
 echo
 echo bin/demo-run $DEMO_START $DEMO_END

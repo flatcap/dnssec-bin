@@ -11,6 +11,6 @@ for f in "$@"; do
 		continue
 	fi
 
-	touch -d "${FILE_DATE:0:8}" "$f"
+	touch --date "${FILE_DATE:0:8}" "$f"
 done
 

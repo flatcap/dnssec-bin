@@ -1,7 +1,6 @@
 #!/bin/bash
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
-KEYDIR=keys
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -17,7 +16,7 @@ cd /var/named
 sed -i -e 's/^#\(.*\.db";\)/\1/' -e 's/^\([^#].*\.db.signed";\)/#\1/' named.conf
 
 # disable zone inclusion of tlsa records
-for i in $(grep -il "include .*\.tlsa\.db" *.db); do
+for i in $(grep --ignore-case --files-with-matches "include .*\.tlsa\.db" *.db); do
 	sed -i 's/^$INCLUDE .*\.tlsa\.db$/;\0/' $i
 done
 
@@ -25,7 +24,7 @@ systemctl try-restart named.service
 
 # tidy up
 rm --force *.db.signed
-rm --force $KEYDIR/*
+rm --force "$DNSSEC_KEY_DIR"
 rm --force dsset-*.
 
 # sync-ds

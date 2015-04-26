@@ -32,7 +32,7 @@ for FILE in ${FILE_LIST[@]}; do
 
 	ZONE="${FILE%.db}"
 
-	ZONE_SERIAL=$(/usr/sbin/named-checkzone $ZONE $FILE | egrep -ho '[0-9]{10}')
+	ZONE_SERIAL=$(/usr/sbin/named-checkzone $ZONE $FILE | grep --extended-regexp --no-filename --only-matching '[0-9]{10}')
 	if [ -z "$ZONE_SERIAL" ]; then
 		echo "Bad zone file: $FILE"
 		exit 1

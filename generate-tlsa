@@ -12,10 +12,10 @@ cd /var/named
 
 echo -e "\e[1;32mGenerate TLSA Records for Services\e[0m"
 
-for ZONE in flatcap.org russon.org; do
+for ZONE in $DNSSEC_DOMAINS; do
 	(
 	echo '; TLSA records for services'
-	for PORT in 443 993 995; do
+	for PORT in $DNSSEC_PORTS; do
 		danetool --load-certificate /etc/pki/tls/$ZONE.crt --proto tcp --port $PORT --host $ZONE --tlsa-rr
 	done
 	) > $ZONE.tlsa.inc

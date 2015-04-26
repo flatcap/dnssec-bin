@@ -19,10 +19,12 @@ $Data::Dumper::Useqq     = 1;
 $Data::Dumper::Quotekeys = 0;
 $Data::Dumper::Sortkeys  = 1;
 
-Readonly my $USERNAME     => 'flatcap';
-Readonly my $PASSWORD     => '5NTzmPBUlhnlRwCe';
 Readonly my $HOST         => 'https://www.gkg.net';
 Readonly my $MAX_SIG_LIFE => (60 * 60 * 24 * 7);
+
+my $USERNAME;
+my $PASSWORD;
+my $KEY_DIR;
 
 sub get_files
 {
@@ -30,8 +32,7 @@ sub get_files
 
 	Readonly my $FIELDS => 7;
 
-	my $keydir = 'keys';
-	my $file   = "$keydir/dsset-$domain.";
+	my $file   = "$KEY_DIR/dsset-$domain.";
 	my $now    = strftime '%Y%m%d', localtime;
 	my %ds_list;
 
@@ -182,7 +183,7 @@ sub synchronise
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
-			create_ds ($domain, $ds);
+			# create_ds ($domain, $ds);
 		}
 	}
 
@@ -192,14 +193,34 @@ sub synchronise
 		} else {
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
-			delete_ds ($domain, $gkg->{'digest'});
+			# delete_ds ($domain, $gkg->{'digest'});
 		}
 	}
 
 	return 0;
 }
 
+sub main
+{
+	$USERNAME   = $ENV{'DNSSEC_GKG_USERNAME'};
+	$PASSWORD   = $ENV{'DNSSEC_GKG_PASSWORD'};
+	$KEY_DIR    = $ENV{'DNSSEC_KEY_DIR'};
+	my $domains = $ENV{'DNSSEC_DOMAINS'};
 
-synchronise ('flatcap.org');
-synchronise ('russon.org');
+	if (!$USERNAME || !$PASSWORD || !$domains) {
+		printf "You need to set some environment variables:\n";
+		printf "\tDNSSEC_GKG_USERNAME\n\tDNSSEC_GKG_PASSWORD\n\tDNSSEC_KEY_DIR\n\tDNSSEC_DOMAINS\n";
+		return 1;
+	}
+
+	my @d = split /\s/msx, $domains;
+	foreach (@d) {
+		synchronise ($_);
+	}
+
+	return 0;
+}
+
+
+exit main();
 

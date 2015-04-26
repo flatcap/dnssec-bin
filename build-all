@@ -2,7 +2,7 @@
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
-export TZ=UTC
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -12,37 +12,28 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-KEYDIR="keys"
-mkdir -p $KEYDIR
-mkdir -p data
-mkdir -p dynamic
+mkdir --parents "$DNSSEC_KEY_DIR"
+mkdir --parents data
+mkdir --parents dynamic
 
 clean-all
 
 generate-dns-glue
 generate-root-certs
 generate-ssh-fingerprint
-
 generate-tlsa
-update-serials flatcap.org.db
-update-serials flatcap.xyz.db
-update-serials russon.org.db
+
+update-serials
 
 START=$(date "+%Y %m")
-NEXT=$(date "+%Y %m" -d "1 month")
 
-generate-ksk flatcap.org $START
-generate-zsk flatcap.org $START
-generate-zsk flatcap.org $NEXT
+for d in $DNSSEC_DOMAINS; do
+	generate-ksk $d $START
+	generate-zsk $d $START
+	sign-zone $d
+done
 
-generate-ksk russon.org  $START
-generate-zsk russon.org  $START
-generate-zsk russon.org  $NEXT
-
-sign-zone flatcap.org
-sign-zone russon.org
-
-set-to-publish-date.sh "$KEYDIR"/*
+set-to-publish-date "$DNSSEC_KEY_DIR"/*
 fix-perms
 show-keys
 
