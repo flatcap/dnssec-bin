@@ -12,7 +12,6 @@ use MIME::Base64;
 use English '-no_match_vars';
 use Readonly;
 use DateTime::Format::ISO8601;
-use Time::Piece;
 use POSIX qw(strftime);
 
 $Data::Dumper::Indent    = 2;
@@ -20,37 +19,10 @@ $Data::Dumper::Useqq     = 1;
 $Data::Dumper::Quotekeys = 0;
 $Data::Dumper::Sortkeys  = 1;
 
-Readonly my $USERNAME => 'flatcap';
-Readonly my $PASSWORD => '5NTzmPBUlhnlRwCe';
-Readonly my $HOST     => 'https://www.gkg.net';
-
-sub get_inactive_date
-{
-	my ($file) = @_;
-
-	Readonly my $FIELDS     => 7;
-	Readonly my $DATE_CHARS => 8;
-
-	my $FH;
-	if (!open $FH, '<', $file) {
-		printf {*STDERR} "Can't open $file: $ERRNO\n";
-		return;
-	}
-
-	my $match;
-	while (<$FH>) {
-		if (/Inactive:\s(\d+)/msx) {
-			$match = substr $1, 0, $DATE_CHARS;
-			last;
-		}
-	}
-
-	if (!close $FH) {
-		printf "Close failed for: %s\n", $file;
-	}
-
-	return $match;
-}
+Readonly my $USERNAME     => 'flatcap';
+Readonly my $PASSWORD     => '5NTzmPBUlhnlRwCe';
+Readonly my $HOST         => 'https://www.gkg.net';
+Readonly my $MAX_SIG_LIFE => (60 * 60 * 24 * 7);
 
 sub get_files
 {
@@ -74,17 +46,12 @@ sub get_files
 		my ($zone, $class, $rr, $key, $algo, $dtype, $digest) = split /\s+/msx, $_, $FIELDS;
 		$digest =~ s/\s//msxg;
 
-		my $key_file = sprintf '%s/K%s.+%03d+%05d.key', $keydir, $domain, $algo, $key;
-		my $date   = get_inactive_date ($key_file);
-		my $format = '%Y%m%d';
-		my $diff   = Time::Piece->strptime ($date, $format) - Time::Piece->strptime ($now, $format);
-
 		$ds_list{$digest} = {
 			keyTag     => $key,
 			algorithm  => $algo,
 			digestType => $dtype,
 			digest     => $digest,
-			maxSigLife => int $diff
+			maxSigLife => $MAX_SIG_LIFE
 		};
 	}
 
