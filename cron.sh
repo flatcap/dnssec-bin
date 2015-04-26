@@ -3,6 +3,12 @@
 DOMAINS="russon.org flatcap.org"
 KEYDIR="keys"
 
+KSK_MONTH1='04'
+KSK_MONTH2='10'
+SWAP_DAY='28'
+
+# ----------------------------------------------------------
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 export TZ=UTC
@@ -29,9 +35,8 @@ echo "Cron: for $YEAR-$MONTH-$DAY"
 
 # ----------------------------------------------------------
 # KSK - 6 months
-# April 28th, October 28th
 
-if [ $MONTH$DAY = '0428' -o $MONTH$DAY = '1028' ]; then
+if [ $MONTH$DAY = "${KSK_MONTH1}${SWAP_DAY}" -o $MONTH$DAY = "${KSK_MONTH2}${SWAP_DAY}" ]; then
 	for d in $DOMAINS; do
 		generate-ksk $d $YEAR $((MONTH+1))
 	done
@@ -39,9 +44,8 @@ fi
 
 # ----------------------------------------------------------
 # ZSK - 1 month
-# 28th of each month
 
-if [ $DAY = '28' ]; then
+if [ $DAY = "$SWAP_DAY" ]; then
 	for d in $DOMAINS; do
 		generate-zsk $d $YEAR $((MONTH+1))
 	done
