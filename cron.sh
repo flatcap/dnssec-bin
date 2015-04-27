@@ -85,9 +85,8 @@ function current_ksk()
 
 	# KSK - 6 months
 
+	echo -e "\e[1;32mCurrent KSK for $ZONE?\e[0m"
 	if ! matching_ksk $ZONE $YEAR$MONTH$DAY$H$M$S; then
-		echo Need to backdate a KSK
-		echo Now: $YEAR $MONTH
 		local M2
 		local Y2
 		if [ $MONTH -le $KSK_MONTH1 ]; then
@@ -97,7 +96,7 @@ function current_ksk()
 			M2=$KSK_MONTH1
 			Y2=$YEAR
 		fi
-		echo Gen KSK for: $ZONE $Y2 $M2
+		echo Need to backdate a KSK: $ZONE $Y2 $M2
 		generate-ksk $ZONE $Y2 $M2
 	else
 		echo We can use an existing KSK for zone $ZONE
@@ -117,6 +116,7 @@ function current_zsk()
 
 	# ZSK - 1 month
 
+	echo -e "\e[1;32mCurrent ZSK for $ZONE?\e[0m"
 	if ! matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		echo Need to backdate a ZSK
 		echo Gen ZSK for: $ZONE $YEAR $MONTH
@@ -176,7 +176,7 @@ H=${X:8:2}
 M=${X:10:2}
 S=${X:12:2}
 
-echo "Cron: for $YEAR-$MONTH-$DAY $H:$M:$S"
+echo -e "\e[1;32mCron: for $YEAR-$MONTH-$DAY $H:$M:$S\e[0m"
 
 daily_prep
 
