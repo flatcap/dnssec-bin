@@ -183,7 +183,7 @@ sub synchronise
 		} else {
 			my $ds = $ds_list{$_};
 			printf "Uploading $domain: $ds->{'digest'}\n";
-			# create_ds ($domain, $ds);
+			create_ds ($domain, $ds);
 		}
 	}
 
@@ -193,7 +193,7 @@ sub synchronise
 		} else {
 			my $gkg = $gkg_list{$_};
 			printf "Deleting $domain: $gkg->{'digest'}\n";
-			# delete_ds ($domain, $gkg->{'digest'});
+			delete_ds ($domain, $gkg->{'digest'});
 		}
 	}
 
