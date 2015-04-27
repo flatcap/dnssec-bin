@@ -19,8 +19,9 @@ for i in *.db.signed; do
 	SERIAL=${SERIAL:0:10}
 	ZONE=${i%.db.signed}
 	RECORDS=$(grep -cwh "RRSIG" "$i")
-	echo -e "\e[1;32mZone: $ZONE\e[0m"
+	echo -e "\e[1;32mSigned zone: $ZONE\e[0m"
 	echo -e "\tSerial:  $SERIAL"
 	echo -e "\tRecords: $RECORDS"
+	echo
 done
 
