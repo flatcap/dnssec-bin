@@ -14,21 +14,49 @@ cd /var/named
 
 [ -d "$DNSSEC_KEY_DIR" ] || exit 0
 
-FILES="$(find "$DNSSEC_KEY_DIR" -type f)"
+FILES="$(find "$DNSSEC_KEY_DIR" -type f -name K\*)"
+
+IGNORE=()
+SAFE=()
+DELETE=()
 
 DATE_NOW=$(date "+%Y%m%d%H%M%S")
 for f in $FILES; do
 	EXPIRY=$(awk '/Delete/{ print $3 ? $3 : $2 }' $f)
 	if [ -z "$EXPIRY" ]; then
-		echo Ignore: $f
+		IGNORE+=($f)
 		continue
 	fi
 
 	if [ $DATE_NOW -gt $EXPIRY ]; then
+		DELETE+=($f)
 		echo Delete: $f
-		rm --force "$f"
 	else
-		echo Safe: $f
+		SAFE+=($f)
 	fi
 done
+
+echo -e "\e[1;32mDelete old keys\e[0m"
+
+if [ ${#SAFE[@]} -gt 0 ]; then
+	echo "Safe:"
+	for f in ${SAFE[@]}; do
+		echo -e "\t$f"
+	done
+fi
+
+if [ ${#IGNORE[@]} -gt 0 ]; then
+	echo "Ignore:"
+	for f in ${IGNORE[@]}; do
+		echo -e "\t$f"
+	done
+fi
+
+if [ ${#DELETE[@]} -gt 0 ]; then
+	echo "Delete:"
+	for f in ${DELETE[@]}; do
+		echo -e "\t$f"
+		rm --force "$f"
+	done
+fi
 
