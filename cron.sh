@@ -117,7 +117,7 @@ function current_zsk()
 
 	# ZSK - 1 month
 
-	if ! matching_zsk $YEAR$MONTH$DAY$H$M$S; then
+	if ! matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		echo Need to backdate a ZSK
 		echo Gen ZSK for: $ZONE $YEAR $MONTH
 		generate-zsk $ZONE $YEAR $MONTH
@@ -148,16 +148,12 @@ function daily_signing()
 
 	local ZONE=$1
 
-	# SIGNING - daily
-
+	rm -f $ZONE.db.signed
 	sign-zone $ZONE
 }
 
 function daily_tidy()
 {
-	# ----------------------------------------------------------
-	# TIDY - daily
-
 	delete-old-keys
 	fix-perms
 	set-to-publish-date "$DNSSEC_KEY_DIR"/*
