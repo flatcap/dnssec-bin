@@ -1,0 +1,26 @@
+#!/bin/bash
+
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
+export TZ="UTC"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+shopt -s nullglob
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+cd /var/named
+
+for i in *.db.signed; do
+	SERIAL=$(grep -o "\<[[:digit:]]\{10\}\>[[:space:]]*;[[:space:]]*serial" "$i")
+	SERIAL=${SERIAL:0:10}
+	ZONE=${i%.db.signed}
+	RECORDS=$(grep -cwh "RRSIG" "$i")
+	echo -e "\e[1;32mZone: $ZONE\e[0m"
+	echo -e "\tSerial:  $SERIAL"
+	echo -e "\tRecords: $RECORDS"
+done
+
