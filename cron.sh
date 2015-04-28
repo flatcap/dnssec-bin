@@ -141,6 +141,7 @@ function current_zsk()
 
 	if [ $DAY = "$SWAP_DAY" ]; then
 		local M2=$(month_plus $MONTH 1)
+		[ $MONTH = 12 ] && YEAR=$((YEAR+1))
 		echo Time for a new ZSK: $ZONE $YEAR $M2
 		generate-zsk $ZONE $YEAR $M2
 	fi
@@ -163,7 +164,7 @@ function daily_signing()
 	generate-tlsa $ZONE
 	update-serials -d $YEAR$MONTH$DAY $ZONE.db
 	date $MONTH$DAY$H$M$YEAR.$S
-	sign-zone $ZONE
+	sign-zone $ZONE $YEAR$MONTH$DAY$H$M$S
 	hwclock --hctosys
 }
 

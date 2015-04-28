@@ -10,12 +10,24 @@ ionice --class 3     --pid $$ > /dev/null
 
 cd /var/named
 
-if [ $# != 1 ]; then
-	echo "Usage: ${0##*/} ZONE"
+if [ $# != 1 -a $# != 2 ]; then
+	echo "Usage: ${0##*/} ZONE [start]"
 	exit 1
 fi
 
+# for i; do echo ARG: $i; done
+
 ZONE=$1
+START=${2:-$(date "+%Y%m%d%H%M%S")}
+S2="${START:0:4}-${START:4:2}-${START:6:2} ${START:8:2}:${START:10:2}:${START:12:2}"
+# echo S2 = $S2
+END=$(date "+%Y%m%d%H%M%S" -d "$S2 + 2 days")
+
+# S2="${START:0:4}-${START:4:2}-${START:6:2} ${START:8:2}:${START:10:2}:${START:12:2}"
+# echo -n "Start: "; date -d "$S2"
+# S2="${END:0:4}-${END:4:2}-${END:6:2} ${END:8:2}:${END:10:2}:${END:12:2}"
+# echo -n "End:   "; date -d "$S2"
+# exit
 
 mkdir --parents "$DNSSEC_KEY_DIR"
 
@@ -25,6 +37,6 @@ SALT=${SALT^^}
 
 # Sign the zone, and write it out to a file named zone.signed
 echo -e "\e[1;32mSign zone $ZONE\e[0m (Salt: $SALT)"
-dnssec-signzone -3 $SALT -S -o $ZONE -K "$DNSSEC_KEY_DIR" $ZONE.db
+dnssec-signzone -s "$START" -e "$END" -3 $SALT -S -o $ZONE -K "$DNSSEC_KEY_DIR" $ZONE.db
 mv dsset-$ZONE. "$DNSSEC_KEY_DIR"
 
