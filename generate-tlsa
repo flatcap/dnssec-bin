@@ -8,11 +8,14 @@ set -o nounset	# set -u
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
+shopt -s nullglob
+
 cd /var/named
 
 echo -e "\e[1;32mGenerate TLSA Records for Services\e[0m"
 
-for ZONE in $DNSSEC_DOMAINS; do
+for ZONE in $@; do
+	echo -e "\t$ZONE"
 	(
 	echo '; TLSA records for services'
 	for PORT in $DNSSEC_PORTS; do
@@ -20,6 +23,4 @@ for ZONE in $DNSSEC_DOMAINS; do
 	done
 	) > $ZONE.tlsa.inc
 done
-
-fix-perms
 

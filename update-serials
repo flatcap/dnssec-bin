@@ -13,16 +13,20 @@ shopt -s nullglob
 
 if [ $# = 0 ]; then
 	FILE_LIST=(*.db)
-
 	if [ ${#FILE_LIST[@]} = 0 ]; then
 		echo "No zone files"
 		exit 1
 	fi
+	DATE=""
 else
+	if [ "$1" = "-d" -a $# -gt 1 ]; then
+		DATE="$2"
+		shift 2
+	fi
 	FILE_LIST=($@)
 fi
 
-SERIAL="$(date '+%Y%m%d00')"
+SERIAL="${DATE:-$(date '+%Y%m%d')}00"
 
 for FILE in ${FILE_LIST[@]}; do
 	if [ ! -s "$FILE" ]; then

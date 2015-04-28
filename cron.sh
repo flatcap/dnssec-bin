@@ -3,6 +3,7 @@
 KSK_MONTH1='06'
 KSK_MONTH2='12'
 SWAP_DAY='28'
+export DNSSEC_DOMAINS="russon.org"
 
 # ----------------------------------------------------------
 
@@ -102,8 +103,9 @@ function current_ksk()
 		echo We can use an existing KSK for zone $ZONE
 	fi
 
-	if [ $MONTH$DAY = "${KSK_MONTH1}${SWAP_DAY}" -o $MONTH$DAY = "${KSK_MONTH2}${SWAP_DAY}" ]; then
-		echo Time for a new KSK
+	REGEX=$(printf "(%02d|%02d)%02d" $(((KSK_MONTH1+11)%12)) $(((KSK_MONTH2+11)%12)) $SWAP_DAY)
+	if [[ $MONTH$DAY =~ $REGEX ]]; then
+		echo Time for a new KSK: $ZONE $YEAR $((MONTH+1))
 		generate-ksk $ZONE $YEAR $((MONTH+1))
 	fi
 }
@@ -118,15 +120,14 @@ function current_zsk()
 
 	echo -e "\e[1;32mCurrent ZSK for $ZONE?\e[0m"
 	if ! matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S; then
-		echo Need to backdate a ZSK
-		echo Gen ZSK for: $ZONE $YEAR $MONTH
+		echo Need to backdate a ZSK: $ZONE $YEAR $MONTH
 		generate-zsk $ZONE $YEAR $MONTH
 	else
 		echo We can use an existing ZSK for zone $ZONE
 	fi
 
 	if [ $DAY = "$SWAP_DAY" ]; then
-		echo Time for a new ZSK
+		echo Time for a new ZSK: $ZONE $YEAR $((MONTH+1))
 		generate-zsk $ZONE $YEAR $((MONTH+1))
 	fi
 }
@@ -137,9 +138,6 @@ function daily_prep()
 	generate-dns-glue
 	generate-root-certs
 	generate-ssh-fingerprint
-	generate-tlsa
-
-	update-serials
 }
 
 function daily_signing()
@@ -148,13 +146,16 @@ function daily_signing()
 
 	local ZONE=$1
 
-	rm -f $ZONE.db.signed
+	generate-tlsa $ZONE
+	update-serials -d $YEAR$MONTH$DAY $ZONE.db
+	date $MONTH$DAY$H$M$YEAR.$S
 	sign-zone $ZONE
+	hwclock --hctosys
 }
 
 function daily_tidy()
 {
-	delete-old-keys
+	delete-old-keys $TIMESTAMP
 	fix-perms
 	set-to-publish-date "$DNSSEC_KEY_DIR"/*
 }
@@ -162,21 +163,21 @@ function daily_tidy()
 
 # ----------------------------------------------------------
 
-X=${1:-$(date "+%Y%m%d%H%M%S")}
+TIMESTAMP=${1:-$(date "+%Y%m%d%H%M%S")}
 
-if [[ ! "$X" =~ ^[0-9]{14}$ ]]; then
-	echo "Invalid date: $X"
+if [[ ! "$TIMESTAMP" =~ ^[0-9]{14}$ ]]; then
+	echo "Invalid date: $TIMESTAMP"
 	exit 1
 fi
 
-YEAR=${X:0:4}
-MONTH=${X:4:2}
-DAY=${X:6:2}
-H=${X:8:2}
-M=${X:10:2}
-S=${X:12:2}
+YEAR=${TIMESTAMP:0:4}
+MONTH=${TIMESTAMP:4:2}
+DAY=${TIMESTAMP:6:2}
+H=${TIMESTAMP:8:2}
+M=${TIMESTAMP:10:2}
+S=${TIMESTAMP:12:2}
 
-echo -e "\e[1;32mCron: for $YEAR-$MONTH-$DAY $H:$M:$S\e[0m"
+echo -e "\e[1;32mCron: for $YEAR-$MONTH-$DAY $H:$M:$S\e[0m -- $TIMESTAMP"
 
 daily_prep
 

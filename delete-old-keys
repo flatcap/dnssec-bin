@@ -20,7 +20,8 @@ IGNORE=()
 SAFE=()
 DELETE=()
 
-DATE_NOW=$(date "+%Y%m%d%H%M%S")
+DATE_NOW=${1:-$(date "+%Y%m%d%H%M%S")}
+
 for f in $FILES; do
 	EXPIRY=$(awk '/Delete/{ print $3 ? $3 : $2 }' $f)
 	if [ -z "$EXPIRY" ]; then
@@ -30,7 +31,6 @@ for f in $FILES; do
 
 	if [ $DATE_NOW -gt $EXPIRY ]; then
 		DELETE+=($f)
-		echo Delete: $f
 	else
 		SAFE+=($f)
 	fi

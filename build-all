@@ -21,9 +21,9 @@ clean-all
 generate-dns-glue
 generate-root-certs
 generate-ssh-fingerprint
-generate-tlsa
 
-update-serials
+generate-tlsa $DNSSEC_DOMAINS
+update-serials $DNSSEC_DOMAINS
 
 START=$(date "+%Y %m")
 
