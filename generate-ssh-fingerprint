@@ -1,6 +1,15 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+FP_FILE="ssh-fingerprint.inc"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -8,16 +17,26 @@ set -o nounset	# set -u
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
+shopt -s nullglob
+
 cd /var/named
 
+[ $# = 0 ] || exit 2
+
 echo -e "\e[1;32mGenerate SSH Fingerprints\e[0m"
-if [ -f "ssh-fingerprint.inc" ]; then
-	echo -e "\talready exists"
+if [ -f "$FP_FILE" ]; then
+	echo -e "\t\e[1;33malready exists\e[0m"
 	exit 0
 fi
 
+OUT=$(ssh-keygen -r @)
+
 (
 	echo '; SSH fingerprints'
-	ssh-keygen -r @
-) > ssh-fingerprint.inc
+	echo "$OUT"
+) > "$FP_FILE"
+
+echo -e "\t$FP_FILE"
+
+exit 0
 

@@ -29,16 +29,18 @@ if [ -f "$GLUE_FILE" ]; then
 	exit 0
 fi
 
-OUT=""
+OUT=()
 for i in {1..5}; do
 	H=$(host "ns$i.linode.com")
-	OUT="${OUT}$(echo "$H" | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/')\n"
+	OUT+=("$(echo "$H" | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/')")
 done
 
 (
 	echo "; Maintain glue to our external dns"
-	echo -en "$OUT" | column -t
+	printf "%s\n" "${OUT[@]}" | column -t
 ) > "$GLUE_FILE"
+
+echo -e "\t$GLUE_FILE"
 
 exit 0
 
