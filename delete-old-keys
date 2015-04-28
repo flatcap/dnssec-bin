@@ -53,9 +53,9 @@ if [ ${#IGNORE[@]} -gt 0 ]; then
 fi
 
 if [ ${#DELETE[@]} -gt 0 ]; then
-	echo "Delete:"
+	echo -e "\e[1;33mDelete:[0m"
 	for f in ${DELETE[@]}; do
-		echo -e "\t$f"
+		echo -e "\t\e[1;33m$f[0m"
 		rm --force "$f"
 	done
 fi

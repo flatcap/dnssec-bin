@@ -1,6 +1,15 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+GLUE_FILE="dns-glue.inc"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -8,18 +17,28 @@ set -o nounset	# set -u
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
+shopt -s nullglob
+
 cd /var/named
 
+[ $# = 0 ] || exit 2
+
 echo -e "\e[1;32mGenerate DNS Glue\e[0m"
-if [ -f "dns-glue.inc" ]; then
-	echo -e "\talready exists"
+if [ -f "$GLUE_FILE" ]; then
+	echo -e "\t\e[1;33malready exists\e[0m"
 	exit 0
 fi
 
+OUT=""
+for i in {1..5}; do
+	H=$(host "ns$i.linode.com")
+	OUT="${OUT}$(echo "$H" | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/')\n"
+done
+
 (
-	echo '; Maintain glue to our external dns'
-	for i in {1..5}; do
-		host "ns$i.linode.com" | sed -e 's/IPv6 /AAA/' -e 's/\.com has//' -e 's/address/A/'
-	done | column -t
-) > dns-glue.inc
+	echo "; Maintain glue to our external dns"
+	echo -en "$OUT" | column -t
+) > "$GLUE_FILE"
+
+exit 0
 

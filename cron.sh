@@ -180,6 +180,10 @@ function daily_tidy()
 
 TIMESTAMP=${1:-$(date "+%Y%m%d%H%M%S")}
 
+if [[ "$TIMESTAMP" =~ ^[0-9]{8}$ ]]; then
+	TIMESTAMP="${TIMESTAMP}043000"
+fi
+
 if [[ ! "$TIMESTAMP" =~ ^[0-9]{14}$ ]]; then
 	echo "Invalid date: $TIMESTAMP"
 	exit 1
