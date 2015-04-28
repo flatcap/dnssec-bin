@@ -20,3 +20,6 @@ rm --force --recursive data
 rm --force --recursive dynamic
 rm --force --recursive "$DNSSEC_KEY_DIR"
 
+rm *.db
+git checkout *.db
+
