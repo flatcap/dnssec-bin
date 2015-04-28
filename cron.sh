@@ -23,6 +23,15 @@ cd /var/named
 
 # ----------------------------------------------------------
 
+function month_plus()
+{
+	[ $# = 2 ] || return
+
+	local M=$(( ( (10#$1-1)+(10#$2) ) %12 + 1))
+	printf "%02d" $M
+}
+
+
 function matching_ksk()
 {
 	[ $# = 2 ] || return 1
@@ -103,10 +112,14 @@ function current_ksk()
 		echo We can use an existing KSK for zone $ZONE
 	fi
 
-	REGEX=$(printf "(%02d|%02d)%02d" $(((10#$KSK_MONTH1+11)%12)) $(((10#$KSK_MONTH2+11)%12)) $SWAP_DAY)
+	local K1=$(month_plus $KSK_MONTH1 11)
+	local K2=$(month_plus $KSK_MONTH2 11)
+
+	REGEX=$(printf "(%02d|%02d)%02d" $K1 $K2 $SWAP_DAY)
 	if [[ $MONTH$DAY =~ $REGEX ]]; then
-		echo Time for a new KSK: $ZONE $YEAR $((10#$MONTH+1))
-		generate-ksk $ZONE $YEAR $((10#$MONTH+1))
+		local M2=$(month_plus $MONTH 1)
+		echo Time for a new KSK: $ZONE $YEAR $M2
+		generate-ksk $ZONE $YEAR $M2
 	fi
 }
 
@@ -127,8 +140,9 @@ function current_zsk()
 	fi
 
 	if [ $DAY = "$SWAP_DAY" ]; then
-		echo Time for a new ZSK: $ZONE $YEAR $((10#$MONTH+1))
-		generate-zsk $ZONE $YEAR $((10#$MONTH+1))
+		local M2=$(month_plus $MONTH 1)
+		echo Time for a new ZSK: $ZONE $YEAR $M2
+		generate-zsk $ZONE $YEAR $M2
 	fi
 }
 
