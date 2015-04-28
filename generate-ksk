@@ -1,14 +1,22 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
 
-shopt -s nullglob
-
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
 
 cd /var/named
 
@@ -16,7 +24,7 @@ echo -e "\e[1;32mGenerate Key-Signing Key\e[0m"
 
 if [ ! $# = 1 -a ! $# = 3 ]; then
 	echo "Usage: ${0##*/} ZONE [YEAR MONTH]"
-	exit 1
+	exit 2
 fi
 
 ZONE="$1"
@@ -40,4 +48,6 @@ D="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 mkdir --parents "$DNSSEC_KEY_DIR"
 
 dnssec-keygen -a NSEC3RSASHA1 -n ZONE -K "$DNSSEC_KEY_DIR" -b 4096 -f KSK -P $P -A $A -I $I -D $D $ZONE
+
+exit 0
 
