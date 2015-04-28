@@ -11,6 +11,10 @@ ionice --class 3     --pid $$ > /dev/null
 cd /var/named
 
 echo -e "\e[1;32mGenerate DNS Glue\e[0m"
+if [ -f "dns-glue.inc" ]; then
+	echo -e "\talready exists"
+	exit 0
+fi
 
 (
 	echo '; Maintain glue to our external dns'

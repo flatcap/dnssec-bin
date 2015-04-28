@@ -13,8 +13,12 @@ shopt -s nullglob
 cd /var/named
 
 echo -e "\e[1;32mGenerate TLSA Records for Services\e[0m"
-
 for ZONE in $@; do
+	if [ -f "$ZONE.tlsa.inc" ]; then
+		echo -e "\t$ZONE already exists"
+		continue
+	fi
+
 	echo -e "\t$ZONE"
 	(
 	echo '; TLSA records for services'
