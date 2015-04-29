@@ -28,7 +28,7 @@ fi
 ZONE=$1
 START=${2:-$(date "+%Y%m%d%H%M%S")}
 S2="${START:0:4}-${START:4:2}-${START:6:2} ${START:8:2}:${START:10:2}:${START:12:2}"
-END=$(date "+%Y%m%d%H%M%S" -d "$S2 + 2 days")
+END=$(date "+%Y%m%d%H%M%S" -d "$S2 UTC + 2 days")
 
 mkdir --parents "$DNSSEC_KEY_DIR"
 
