@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 export TZ="UTC"
@@ -9,6 +17,8 @@ set -o nounset	# set -u
 
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
 
 cd /var/named
 
@@ -33,7 +43,7 @@ for d in $DNSSEC_DOMAINS; do
 	sign-zone $d
 done
 
-set-to-publish-date "$DNSSEC_KEY_DIR"/*
+set-to-publish-date
 fix-perms
 show-keys
 
