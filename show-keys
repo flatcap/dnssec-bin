@@ -1,20 +1,35 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
 
-shopt -s nullglob
-
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
 
 cd /var/named
 
 [ ! -d "$DNSSEC_KEY_DIR" ] && exit 0
 
-FILES=("$DNSSEC_KEY_DIR"/*.key)
+if [ $# = 0 ]; then
+	FILES=("$DNSSEC_KEY_DIR"/K*.key)
+else
+	for i in "$@"; do
+		FILES=("$DNSSEC_KEY_DIR"/K${i}.*.key)
+	done
+fi
+
 [ ${#FILES[@]} = 0 ] && exit 0
 
 for type in "key-signing" "zone-signing"; do

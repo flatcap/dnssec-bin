@@ -38,8 +38,8 @@ sub get_files
 
 	my $FH;
 	if (!open $FH, '<', $file) {
-		printf {*STDERR} "Can't open $file: $ERRNO\n";
-		return;
+		# printf {*STDERR} "Can't open $file: $ERRNO\n";
+		return %ds_list;
 	}
 
 	while (<$FH>) {

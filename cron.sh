@@ -1,8 +1,8 @@
 #!/bin/bash
 
-KSK_MONTH1='06'
-KSK_MONTH2='12'
-SWAP_DAY='28'
+KSK_MONTH1="06"
+KSK_MONTH2="12"
+SWAP_DAY="28"
 export DNSSEC_DOMAINS="russon.org"
 
 # ----------------------------------------------------------
@@ -174,7 +174,7 @@ function daily_signing()
 	local ZONE=$1
 
 	generate-tlsa $ZONE
-	update-serials -d $YEAR$MONTH$DAY $ZONE.db
+	update-serials -d $YEAR$MONTH$DAY $ZONE
 	# date $MONTH$DAY$H$M$YEAR.$S
 	sign-zone $ZONE $YEAR$MONTH$DAY$H$M$S
 	# hwclock --hctosys
