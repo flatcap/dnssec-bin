@@ -1,6 +1,24 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+cd /var/named
 
 function usage()
 {
@@ -8,8 +26,6 @@ function usage()
 	exit 1
 }
 
-
-shopt -s nullglob
 
 if [ $# = 0 ]; then
 	FILE_LIST=(*.db)
@@ -23,7 +39,14 @@ else
 		DATE="$2"
 		shift 2
 	fi
-	FILE_LIST=($@)
+	for i in "$@"; do
+		if [ -f "$i.db" ]; then
+			FILE_LIST=($i.db)
+		else
+			echo "Zone file doesn't exist: $i.db"
+			exit 1
+		fi
+	done
 fi
 
 SERIAL="${DATE:-$(date '+%Y%m%d')}00"
