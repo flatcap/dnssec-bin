@@ -206,10 +206,19 @@ sub main
 	$PASSWORD   = $ENV{'DNSSEC_GKG_PASSWORD'};
 	$KEY_DIR    = $ENV{'DNSSEC_KEY_DIR'};
 	my $domains = $ENV{'DNSSEC_DOMAINS'};
+	my $fail    = 0;
 
-	if (!$USERNAME || !$PASSWORD || !$domains) {
+	if (!$USERNAME || !$PASSWORD || !$KEY_DIR || !$domains) {
+		$fail = 1;
 		printf "You need to set some environment variables:\n";
-		printf "\tDNSSEC_GKG_USERNAME\n\tDNSSEC_GKG_PASSWORD\n\tDNSSEC_KEY_DIR\n\tDNSSEC_DOMAINS\n";
+	}
+
+	if (!$USERNAME) { printf "\tDNSSEC_GKG_USERNAME\n"; }
+	if (!$PASSWORD) { printf "\tDNSSEC_GKG_PASSWORD\n"; }
+	if (!$KEY_DIR)  { printf "\tDNSSEC_KEY_DIR\n";      }
+	if (!$domains)  { printf "\tDNSSEC_DOMAINS\n";      }
+
+	if ($fail) {
 		return 1;
 	}
 
