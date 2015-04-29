@@ -40,10 +40,12 @@ function matching_ksk()
 	local TIMESTAMP=$2
 	local FILE
 	local k
+	local RESULT=1
 
 	for k in "$DNSSEC_KEY_DIR"/K$ZONE*.key; do
 		FILE=$(cat $k)
 		if [[ ! "$FILE" =~ key-signing.*Activate:\ *([0-9]{14}).*Inactive:\ ([0-9]{14}) ]]; then
+			# log bad file
 			continue
 		fi
 
@@ -53,10 +55,10 @@ function matching_ksk()
 			continue
 		fi
 
-		echo Matching KSK: ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} $k
-		return 0
+		echo -e "\t\e[1;33mExisting KSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}\e[0m"
+		RESULT=0
 	done
-	return 1
+	return $RESULT
 }
 
 function matching_zsk()
@@ -67,10 +69,12 @@ function matching_zsk()
 	local TIMESTAMP=$2
 	local FILE
 	local k
+	local RESULT=1
 
 	for k in "$DNSSEC_KEY_DIR"/K$ZONE*.key; do
 		FILE=$(cat $k)
 		if [[ ! "$FILE" =~ zone-signing.*Activate:\ *([0-9]{14}).*Inactive:\ ([0-9]{14}) ]]; then
+			# log bad file
 			continue
 		fi
 
@@ -80,10 +84,10 @@ function matching_zsk()
 			continue
 		fi
 
-		echo Matching ZSK: ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} $k
-		return 0
+		echo -e "\t\e[1;33mExisting ZSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}\e[0m"
+		RESULT=0
 	done
-	return 1
+	return $RESULT
 }
 
 
@@ -95,21 +99,24 @@ function current_ksk()
 
 	# KSK - 6 months
 
-	echo -e "\e[1;32mCurrent KSK for $ZONE?\e[0m"
+	echo -e "\e[1;32mGenerate KSK for $ZONE\e[0m"
 	if ! matching_ksk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		local M2
 		local Y2
-		if [ $MONTH -le $KSK_MONTH1 ]; then
+		if [ $MONTH -lt $KSK_MONTH1 ]; then
 			M2=$KSK_MONTH2
 			Y2=$((YEAR-1))
-		else
+		elif [ $MONTH -lt $KSK_MONTH2 ]; then
 			M2=$KSK_MONTH1
+			Y2=$YEAR
+		else
+			M2=$KSK_MONTH2
 			Y2=$YEAR
 		fi
 		echo Need to backdate a KSK: $ZONE $Y2 $M2
 		generate-ksk $ZONE $Y2 $M2
-	else
-		echo We can use an existing KSK for zone $ZONE
+		show-keys
+		matching_ksk $ZONE $YEAR$MONTH$DAY$H$M$S
 	fi
 
 	local K1=$(month_plus $KSK_MONTH1 11)
@@ -118,8 +125,11 @@ function current_ksk()
 	REGEX=$(printf "(%02d|%02d)%02d" $K1 $K2 $SWAP_DAY)
 	if [[ $MONTH$DAY =~ $REGEX ]]; then
 		local M2=$(month_plus $MONTH 1)
-		echo Time for a new KSK: $ZONE $YEAR $M2
-		generate-ksk $ZONE $YEAR $M2
+		local Y2=$YEAR
+		[ $MONTH = 12 ] && Y2=$((Y2+1))
+		echo Time for a new KSK: $ZONE $Y2 $M2
+		generate-ksk $ZONE $Y2 $M2
+		show-keys
 	fi
 }
 
@@ -131,19 +141,21 @@ function current_zsk()
 
 	# ZSK - 1 month
 
-	echo -e "\e[1;32mCurrent ZSK for $ZONE?\e[0m"
+	echo -e "\e[1;32mGenerate ZSK for $ZONE\e[0m"
 	if ! matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		echo Need to backdate a ZSK: $ZONE $YEAR $MONTH
 		generate-zsk $ZONE $YEAR $MONTH
-	else
-		echo We can use an existing ZSK for zone $ZONE
+		show-keys
+		matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S
 	fi
 
 	if [ $DAY = "$SWAP_DAY" ]; then
 		local M2=$(month_plus $MONTH 1)
-		[ $MONTH = 12 ] && YEAR=$((YEAR+1))
-		echo Time for a new ZSK: $ZONE $YEAR $M2
-		generate-zsk $ZONE $YEAR $M2
+		local Y2=$YEAR
+		[ $MONTH = 12 ] && Y2=$((Y2+1))
+		echo Time for a new ZSK: $ZONE $Y2 $M2
+		generate-zsk $ZONE $Y2 $M2
+		show-keys
 	fi
 }
 

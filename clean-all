@@ -1,5 +1,13 @@
 #!/bin/sh
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 
 set -o errexit	# set -e
@@ -7,6 +15,8 @@ set -o nounset	# set -u
 
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
 
 cd /var/named
 
@@ -20,6 +30,6 @@ rm --force --recursive data
 rm --force --recursive dynamic
 rm --force --recursive "$DNSSEC_KEY_DIR"
 
-rm *.db
-git checkout *.db
+rm --force *.db
+git checkout -- '*.db'
 
