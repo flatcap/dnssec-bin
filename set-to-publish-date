@@ -1,16 +1,40 @@
 #!/bin/bash
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
+cd /var/named
+
+if [ $# = 0 ]; then
+	set -- $DNSSEC_KEY_DIR/*.{key,private}
+fi
+
+echo -e "\e[1;32mSet to Publish Date\e[0m"
 for f in "$@"; do
 	FILE_DATE=$(awk '/Publish/{ print $3 ? $3 : $2 }' $f)
-	if [ -z "$f" ]; then
-		echo Ignoring: $f
+	if [ -z "$FILE_DATE" ]; then
+		echo -e "\tIgnoring: $f"
 		continue
 	fi
 
+	echo -e "\t${FILE_DATE:0:8} - $f"
 	touch --date "${FILE_DATE:0:8}" "$f"
 done
+
+exit 0
 
