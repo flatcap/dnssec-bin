@@ -16,7 +16,7 @@ mkdir --parents "$DNSSEC_KEY_DIR"
 mkdir --parents data
 mkdir --parents dynamic
 
-clean-all
+clean all
 
 generate-dns-glue
 generate-root-certs

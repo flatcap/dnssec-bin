@@ -1,0 +1,54 @@
+#!/bin/sh
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+cd /var/named
+
+[ $# = 0 ] && exit 2
+
+echo -e "\e[1;32mCleanup\e[0m"
+if [ $# = 1 -a "$1" = "all" ]; then
+	set -- $DNSSEC_DOMAINS
+
+	echo -e "\tShared resources"
+	rm --force dns-glue.inc
+	rm --force named.ca
+	rm --force ssh-fingerprint.inc
+
+	echo -e "\tShared directories"
+	rm --force --recursive data
+	rm --force --recursive dynamic
+	rm --force --recursive "$DNSSEC_KEY_DIR"
+
+	echo -e "\tReset zone files"
+	rm --force *.db
+	git checkout -- '*.db'
+fi
+
+for ZONE in "$@"; do
+	echo -e "\tZone: $ZONE"
+	rm --force ${ZONE}.db.signed
+	rm --force ${ZONE}.tlsa.inc
+
+	rm --force "$DNSSEC_KEY_DIR"/K${ZONE}.*
+	rm --force "$DNSSEC_KEY_DIR"/dsset-${ZONE}.
+done
+
+exit 0
+

@@ -175,9 +175,9 @@ function daily_signing()
 
 	generate-tlsa $ZONE
 	update-serials -d $YEAR$MONTH$DAY $ZONE.db
-	date $MONTH$DAY$H$M$YEAR.$S
+	# date $MONTH$DAY$H$M$YEAR.$S
 	sign-zone $ZONE $YEAR$MONTH$DAY$H$M$S
-	hwclock --hctosys
+	# hwclock --hctosys
 }
 
 function daily_tidy()
@@ -223,6 +223,7 @@ echo
 show-keys
 show-signed
 
-# ds-sync.pl
-# reload named
+ds-sync.pl
+systemctl reload named
+systemctl status named
 
