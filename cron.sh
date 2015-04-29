@@ -223,7 +223,7 @@ echo
 show-keys
 show-signed
 
-ds-sync.pl
-systemctl reload named
-systemctl status named
+# ds-sync.pl
+# systemctl reload named
+# systemctl status named
 

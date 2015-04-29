@@ -1,0 +1,51 @@
+#!/bin/bash
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
+}
+
+trap finish EXIT
+
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+cd /var/named
+
+[ $# = 0 ] && exit 2
+
+echo -e "\e[1;32mDisable DNSSEC\e[0m"
+
+if [ $# = 1 -a "$1" = "all" ]; then
+	set -- $DNSSEC_DOMAINS
+fi
+
+for ZONE in "$@"; do
+	echo -e "\tZone: $ZONE"
+
+	# edit named config
+	#	disable inclusion of   signed domain
+	#	enable  inclusion of unsigned domain
+	sed -i \
+		-e "s/^#\(\tfile\s\+\"$ZONE\.db\";\)/\1/" \
+		-e "s/^\(\tfile\s\+\"$ZONE\.db.signed\";\)/#\1/" \
+		named.conf
+
+	# disable zone inclusion of tlsa records
+	sed -i "s/^\$INCLUDE \"$ZONE\.tlsa\.inc\"$/;\0/" "$ZONE.db"
+done
+
+clean "$@"
+
+ds-sync.pl
+systemctl reload named
+systemctl status named
+
