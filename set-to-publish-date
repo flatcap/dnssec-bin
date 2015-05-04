@@ -1,14 +1,9 @@
 #!/bin/bash
 
-function finish()
-{
-	local RETVAL=$?
-	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
-}
-
-trap finish EXIT
-
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -18,13 +13,21 @@ ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
+
 cd /var/named
 
 if [ $# = 0 ]; then
 	set -- $DNSSEC_KEY_DIR/*.{key,private}
 fi
 
-echo -e "\e[1;32mSet to Publish Date\e[0m"
+log_info "Set to Publish Date"
 for f in "$@"; do
 	FILE_DATE=$(awk '/Publish/{ print $3 ? $3 : $2 }' $f)
 	if [ -z "$FILE_DATE" ]; then

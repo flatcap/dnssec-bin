@@ -1,16 +1,25 @@
 #!/bin/bash
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
 
 export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
 
-shopt -s nullglob
-
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
 
 cd /var/named
 
@@ -19,7 +28,7 @@ for i in *.db.signed; do
 	SERIAL=${SERIAL:0:10}
 	ZONE=${i%.db.signed}
 	RECORDS=$(grep -cwh "RRSIG" "$i")
-	echo -e "\e[1;32mSigned zone: $ZONE\e[0m"
+	log_info "Signed zone: $ZONE"
 	echo -e "\tSerial:  $SERIAL"
 	echo -e "\tRecords: $RECORDS"
 	echo

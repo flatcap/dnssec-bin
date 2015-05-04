@@ -1,14 +1,25 @@
 #!/bin/bash
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
 
-shopt -s nullglob
-
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
 
 cd /var/named
 
@@ -36,7 +47,7 @@ for f in $FILES; do
 	fi
 done
 
-echo -e "\e[1;32mDelete old keys\e[0m"
+log_info "Delete old keys"
 
 if [ ${#SAFE[@]} -gt 0 ]; then
 	echo "Safe:"
@@ -53,9 +64,9 @@ if [ ${#IGNORE[@]} -gt 0 ]; then
 fi
 
 if [ ${#DELETE[@]} -gt 0 ]; then
-	echo -e "\e[1;33mDelete:[0m"
+	log_warning "Delete:"
 	for f in ${DELETE[@]}; do
-		echo -e "\t\e[1;33m$f[0m"
+		log_warning "\t$f"
 		rm --force "$f"
 	done
 fi

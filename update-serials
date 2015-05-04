@@ -1,14 +1,9 @@
 #!/bin/bash
 
-function finish()
-{
-	local RETVAL=$?
-	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
-}
-
-trap finish EXIT
-
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -18,7 +13,11 @@ ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
-cd /var/named
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
 
 function usage()
 {
@@ -26,6 +25,10 @@ function usage()
 	exit 1
 }
 
+
+cd /var/named
+
+trap finish EXIT
 
 if [ $# = 0 ]; then
 	FILE_LIST=(*.db)
@@ -70,7 +73,7 @@ done
 
 : $((SERIAL++))
 
-echo -e "\e[1;32mUpdate zone file serial numbers\e[0m"
+log_info "Update zone file serial numbers"
 for FILE in ${FILE_LIST[@]}; do
 	ZONE="${FILE%.db}"
 	sed -i "s/\<[0-9]\{10\}\>/$SERIAL/" $FILE

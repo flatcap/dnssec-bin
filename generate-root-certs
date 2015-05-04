@@ -1,15 +1,10 @@
 #!/bin/bash
 
-function finish()
-{
-	local RETVAL=$?
-	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
-}
-
-trap finish EXIT
-
-PATH="/var/named/bin:/usr/bin:/usr/sbin"
 CERT_FILE="named.ca"
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -19,13 +14,21 @@ ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
+
 cd /var/named
 
 [ $# = 0 ] || exit 2
 
-echo -e "\e[1;32mGenerate Root Certificates\e[0m"
+log_info "aenerate Root Certificates"
 if [ -f "$CERT_FILE" ]; then
-	echo -e "\t\e[1;33malready exists\e[0m"
+	log_warning "\talready exists"
 	exit 0
 fi
 

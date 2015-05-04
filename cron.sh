@@ -8,6 +8,7 @@ export DNSSEC_DOMAINS="russon.org"
 # ----------------------------------------------------------
 
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
 
 export TZ="UTC"
 
@@ -18,6 +19,14 @@ shopt -s nullglob
 
 renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
 
 cd /var/named
 
@@ -55,7 +64,7 @@ function matching_ksk()
 			continue
 		fi
 
-		echo -e "\t\e[1;33mExisting KSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}\e[0m"
+		log_warning "\tExisting KSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
 		RESULT=0
 	done
 	return $RESULT
@@ -84,7 +93,7 @@ function matching_zsk()
 			continue
 		fi
 
-		echo -e "\t\e[1;33mExisting ZSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}\e[0m"
+		log_warning "\tExisting ZSK: $k ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}"
 		RESULT=0
 	done
 	return $RESULT
@@ -99,7 +108,7 @@ function current_ksk()
 
 	# KSK - 6 months
 
-	echo -e "\e[1;32mGenerate KSK for $ZONE\e[0m"
+	log_info "Generate KSK for $ZONE"
 	if ! matching_ksk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		local M2
 		local Y2
@@ -141,7 +150,7 @@ function current_zsk()
 
 	# ZSK - 1 month
 
-	echo -e "\e[1;32mGenerate ZSK for $ZONE\e[0m"
+	log_info "Generate ZSK for $ZONE"
 	if ! matching_zsk $ZONE $YEAR$MONTH$DAY$H$M$S; then
 		echo Need to backdate a ZSK: $ZONE $YEAR $MONTH
 		generate-zsk $ZONE $YEAR $MONTH
@@ -208,7 +217,7 @@ H=${TIMESTAMP:8:2}
 M=${TIMESTAMP:10:2}
 S=${TIMESTAMP:12:2}
 
-echo -e "\e[1;32mCron: for $YEAR-$MONTH-$DAY $H:$M:$S\e[0m -- $TIMESTAMP"
+log_info "Cron: for $YEAR-$MONTH-$DAY $H:$M:$S -- $TIMESTAMP"
 
 daily_prep
 

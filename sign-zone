@@ -1,14 +1,9 @@
 #!/bin/bash
 
-function finish()
-{
-	local RETVAL=$?
-	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
-}
-
-trap finish EXIT
-
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
 
 set -o errexit	# set -e
 set -o nounset	# set -u
@@ -17,6 +12,14 @@ renice --priority 19 --pid $$ > /dev/null
 ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
 
 cd /var/named
 
@@ -37,7 +40,7 @@ SALT=${SALT:0:16}
 SALT=${SALT^^}
 
 # Sign the zone, and write it out to a file named zone.signed
-echo -e "\e[1;32mSign zone $ZONE\e[0m (Salt: $SALT)"
+log_info "Sign zone $ZONE (Salt: $SALT)"
 dnssec-signzone -s "$START" -e "$END" -3 $SALT -S -o $ZONE -K "$DNSSEC_KEY_DIR" $ZONE.db
 mv dsset-$ZONE. "$DNSSEC_KEY_DIR"
 

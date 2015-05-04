@@ -1,14 +1,7 @@
 #!/bin/bash
 
-function finish()
-{
-	local RETVAL=$?
-	[ $RETVAL = 0 ] || echo -e "\e[1;31m${0##*/} failed: $RETVAL\e[0m"
-}
-
-trap finish EXIT
-
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
 
 export TZ="UTC"
 
@@ -20,7 +13,17 @@ ionice --class 3     --pid $$ > /dev/null
 
 shopt -s nullglob
 
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
+
 cd /var/named
+
+[ $# = 0 ] && exit 2
 
 mkdir --parents "$DNSSEC_KEY_DIR"
 mkdir --parents data
