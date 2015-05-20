@@ -3,7 +3,6 @@
 KSK_MONTH1="06"
 KSK_MONTH2="12"
 SWAP_DAY="28"
-export DNSSEC_DOMAINS="russon.org"
 
 # ----------------------------------------------------------
 
@@ -29,6 +28,8 @@ function finish()
 trap finish EXIT
 
 cd /var/named
+
+source env.sh
 
 # ----------------------------------------------------------
 
@@ -232,7 +233,7 @@ echo
 show-keys
 show-signed
 
-# ds-sync.pl
-# systemctl reload named
-# systemctl status named
+ds-sync.pl
+systemctl reload named
+systemctl status named
 
