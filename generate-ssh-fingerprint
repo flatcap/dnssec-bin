@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright 2014-2015 Richard Russon (FlatCap)
+# Licensed under the GPLv3
+
 FP_FILE="ssh-fingerprint.inc"
 PATH="/var/named/bin:/usr/bin:/usr/sbin"
 source log.sh

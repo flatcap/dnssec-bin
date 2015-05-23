@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Copyright 2014-2015 Richard Russon (FlatCap)
+# Licensed under the GPLv3
+
 use strict;
 use warnings;
 

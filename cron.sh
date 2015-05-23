@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright 2014-2015 Richard Russon (FlatCap)
+# Licensed under the GPLv3
+
 KSK_MONTH1="06"
 KSK_MONTH2="12"
 SWAP_DAY="28"

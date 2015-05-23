@@ -1,3 +1,6 @@
+# Copyright 2014-2015 Richard Russon (FlatCap)
+# Licensed under the GPLv3
+
 function log_error()
 {
 	if [ -t 1 ]; then
