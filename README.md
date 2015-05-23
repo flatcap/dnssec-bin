@@ -26,8 +26,7 @@ DNSSEC relies on two pairs of private/public keys and a SALT.
 
 When you've generated the KSK, you upload it's fingerprint to your registrar.
 This is used to sign the delegation from the parent zone. e.g.
-
-	KSK fingerprint for flatcap.org is used to sign the flatcap.org link in the .org zone file
+KSK fingerprint for flatcap.org is used to sign the flatcap.org link in the .org zone file
 
 The KSK is used to sign the ZSK which is then combined with the SALT to create a signed zone file.
 This signed zone is then given to BIND.
@@ -61,16 +60,16 @@ This signed zone is then given to BIND.
 
 Some sites where I learnt what I needed to know:
 
-<https://grepular.com/Understanding_DNSSEC>
-<https://www.digitalocean.com/community/tutorials/how-to-setup-dnssec-on-an-authoritative-bind-dns-server--2>
-<http://www.nlnetlabs.nl/publications/dnssec_howto/>
+- <https://grepular.com/Understanding_DNSSEC>
+- <https://www.digitalocean.com/community/tutorials/how-to-setup-dnssec-on-an-authoritative-bind-dns-server--2>
+- <http://www.nlnetlabs.nl/publications/dnssec_howto/>
 
 Testing your domain:
 
-<http://dnssec-debugger.verisignlabs.com/>
-<http://dnsviz.net/>
-<http://www.dnssy.com/>
-<http://dnssec.vs.uni-due.de/>
+- <http://dnssec-debugger.verisignlabs.com/>
+- <http://dnsviz.net/>
+- <http://www.dnssy.com/>
+- <http://dnssec.vs.uni-due.de/>
 
 ## License
 
