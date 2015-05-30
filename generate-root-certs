@@ -29,7 +29,7 @@ cd /var/named
 
 [ $# = 0 ] || exit 2
 
-log_info "aenerate Root Certificates"
+log_info "Generate Root Certificates"
 if [ -f "$CERT_FILE" ]; then
 	log_warning "\talready exists"
 	exit 0
