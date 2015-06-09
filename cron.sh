@@ -237,6 +237,6 @@ show-keys
 show-signed
 
 ds-sync.pl
-systemctl reload named
+systemctl reload-or-restart named
 systemctl status named
 
