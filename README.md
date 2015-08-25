@@ -24,7 +24,7 @@ DNSSEC relies on two pairs of private/public keys and a SALT.
 - Zone Signing Key (ZSK) - regenerated every month
 - [SALT](https://en.wikipedia.org/wiki/Salt_%28cryptography%29) is a random string - regenerated daily
 
-When you've generated the KSK, you upload it's fingerprint to your registrar.
+When you've generated the KSK, you upload its fingerprint to your registrar.
 This is used to sign the delegation from the parent zone. e.g.
 KSK fingerprint for flatcap.org is used to sign the flatcap.org link in the .org zone file
 

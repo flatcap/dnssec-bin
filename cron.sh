@@ -187,6 +187,7 @@ function daily_signing()
 	local ZONE=$1
 
 	generate-tlsa $ZONE
+	generate-dkim $ZONE
 	update-serials -d $YEAR$MONTH$DAY $ZONE
 	# date $MONTH$DAY$H$M$YEAR.$S
 	sign-zone $ZONE $YEAR$MONTH$DAY$H$M$S
