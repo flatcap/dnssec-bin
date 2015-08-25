@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Copyright 2015 Richard Russon (FlatCap)
+# Licensed under the GPLv3
+
+SUFFIX="dkim.inc"
+PATH="/var/named/bin:/usr/bin:/usr/sbin"
+source log.sh
+
+export TZ="UTC"
+
+set -o errexit	# set -e
+set -o nounset	# set -u
+
+renice --priority 19 --pid $$ > /dev/null
+ionice --class 3     --pid $$ > /dev/null
+
+shopt -s nullglob
+
+function finish()
+{
+	local RETVAL=$?
+	[ $RETVAL = 0 ] || log_error "${0##*/} failed: $RETVAL"
+}
+
+trap finish EXIT
+
+cd /var/named
+
+[ $# = 0 ] && exit 2
+
+log_info "Generate DKIM Records for Services"
+for ZONE in $@; do
+	FILE="$ZONE.$SUFFIX"
+	if [ -f "$FILE" ]; then
+		log_warning "\t$ZONE already exists"
+		continue
+	fi
+
+	cp /etc/opendkim/keys/$ZONE/mail.txt "$FILE"
+	echo -e "\t$ZONE"
+done
+
+exit 0
+
