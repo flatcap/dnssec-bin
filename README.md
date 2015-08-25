@@ -40,6 +40,7 @@ This signed zone is then given to BIND.
 | generate-root-certs      | Local reference to the root DNS servers                                                     |
 | generate-ssh-fingerprint | Put SSH fingerprints in DNS records                                                         |
 | generate-tlsa            | [DANE](https://en.wikipedia.org/wiki/DNS-based_Authentication_of_Named_Entities) references |
+| generate-dkim            | [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail) records                    |
 |                          |                                                                                             |
 | generate-ksk             | Create a new Key Signing Key                                                                |
 | generate-zsk             | Create a new Zone Signing Key                                                               |
