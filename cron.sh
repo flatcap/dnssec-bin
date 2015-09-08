@@ -178,6 +178,8 @@ function daily_prep()
 	generate-dns-glue
 	generate-root-certs
 	generate-ssh-fingerprint
+
+	mkdir -p /var/named/{data,dynamic}
 }
 
 function daily_signing()
@@ -189,9 +191,7 @@ function daily_signing()
 	generate-tlsa $ZONE
 	generate-dkim $ZONE
 	update-serials -d $YEAR$MONTH$DAY $ZONE
-	# date $MONTH$DAY$H$M$YEAR.$S
 	sign-zone $ZONE $YEAR$MONTH$DAY$H$M$S
-	# hwclock --hctosys
 }
 
 function daily_tidy()
