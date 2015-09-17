@@ -40,6 +40,7 @@ if [ $# = 1 -a "$1" = "all" ]; then
 	echo -e "\tShared directories"
 	rm --force --recursive data
 	rm --force --recursive dynamic
+	rm --force --recursive slaves
 	rm --force --recursive "$DNSSEC_KEY_DIR"
 
 	echo -e "\tReset zone files"
@@ -51,6 +52,7 @@ for ZONE in "$@"; do
 	echo -e "\tZone: $ZONE"
 	rm --force ${ZONE}.db.signed
 	rm --force ${ZONE}.tlsa.inc
+	rm --force ${ZONE}.dkim.inc
 
 	rm --force "$DNSSEC_KEY_DIR"/K${ZONE}.*
 	rm --force "$DNSSEC_KEY_DIR"/dsset-${ZONE}.
