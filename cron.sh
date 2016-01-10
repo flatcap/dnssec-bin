@@ -178,6 +178,7 @@ function daily_prep()
 	generate-dns-glue
 	generate-root-certs
 	generate-ssh-fingerprint
+	generate-gpg
 
 	mkdir -p /var/named/{data,dynamic}
 }

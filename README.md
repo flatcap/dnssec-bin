@@ -39,6 +39,7 @@ This signed zone is then given to BIND.
 | generate-dns-glue        | Local reference to our DNS servers                                                          |
 | generate-root-certs      | Local reference to the root DNS servers                                                     |
 | generate-ssh-fingerprint | Put SSH fingerprints in DNS records                                                         |
+| generate-gpg             | Generate PKA/DANE Records for GPG                                                           |
 | generate-tlsa            | [DANE](https://en.wikipedia.org/wiki/DNS-based_Authentication_of_Named_Entities) references |
 | generate-dkim            | [DKIM](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail) records                    |
 |                          |                                                                                             |
