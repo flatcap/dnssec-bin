@@ -53,6 +53,7 @@ for ZONE in "$@"; do
 	rm --force ${ZONE}.db.signed
 	rm --force ${ZONE}.tlsa.inc
 	rm --force ${ZONE}.dkim.inc
+	rm --force ${ZONE}.gpg.inc
 
 	rm --force "$DNSSEC_KEY_DIR"/K${ZONE}.*
 	rm --force "$DNSSEC_KEY_DIR"/dsset-${ZONE}.
