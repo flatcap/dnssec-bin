@@ -39,7 +39,7 @@ for ZONE in $@; do
 
 	OUT=()
 	for PORT in $DNSSEC_PORTS; do
-		OUT+=("$(danetool --load-certificate /etc/pki/tls/$ZONE.crt --proto tcp --port $PORT --host $ZONE --tlsa-rr)")
+		OUT+=("$(danetool --load-certificate /etc/pki/tls/certs/$ZONE.crt --proto tcp --port $PORT --host $ZONE --tlsa-rr)")
 	done
 
 	(
