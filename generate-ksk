@@ -53,7 +53,7 @@ D="$(date "+%Y%m%d" --date "$YEAR-$MONTH-$DAY + $VALID + 2 days")$TIME"
 
 mkdir --parents "$DNSSEC_KEY_DIR"
 
-dnssec-keygen -a NSEC3RSASHA1 -n ZONE -K "$DNSSEC_KEY_DIR" -b 4096 -f KSK -P $P -A $A -I $I -D $D $ZONE
+dnssec-keygen -a RSASHA256 -n ZONE -K "$DNSSEC_KEY_DIR" -b 4096 -f KSK -P $P -A $A -I $I -D $D $ZONE
 
 exit 0
 
