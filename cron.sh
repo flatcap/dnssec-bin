@@ -32,6 +32,11 @@ trap finish EXIT
 
 cd /var/named
 
+if [ -e named.conf ]; then
+        # probably trampled by a dnf update
+        git restore named.conf
+fi
+
 source env.sh
 
 # ----------------------------------------------------------
