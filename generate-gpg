@@ -25,8 +25,8 @@ trap finish EXIT
 log_info "Generate PKA/DANE Records for GPG"
 
 (
-	gpg2 --export --export-options export-pka  "$KEY"
-	gpg2 --export --export-options export-dane "$KEY"
+	# gpg --export --export-options export-pka  "$KEY"
+	gpg --export --export-options export-dane "$KEY"
 	
 ) > "$FILE"
 
