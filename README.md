@@ -71,7 +71,7 @@ Testing your domain:
 - <http://dnssec-debugger.verisignlabs.com/>
 - <http://dnsviz.net/>
 - <http://www.dnssy.com/>
-- <http://dnssec.vs.uni-due.de/>
+- <https://wander.science/projects/dns/dnssec-resolver-test/>
 
 ## License
 
